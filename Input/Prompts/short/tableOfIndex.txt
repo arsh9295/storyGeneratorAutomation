@@ -1,0 +1,26 @@
+Generate a structured table of contents for a story in {language} \
+with around 4 to 5 chapters. The novel follows the {storyType} genre. Each chapter should have \
+a compelling title and a brief description summarizing its main events or themes or focus of the chapter and how it contributes to the overall story flow.. \
+The titles should be engaging and hint at key plot points while maintaining suspense and excitement. \
+Ensure the chapters flow logically, gradually building tension and developing the story. \
+Return the result as a dictionary where keys are chapter numbers (as integers), and values are \
+dictionaries with 'title' and 'description' keys. The output should be properly formatted as a JSON-like structure. \
+Also generate name of novel as first element of dictionary with key as 'novel_name' and value as name of novel. \
+Key Story Components: Specify 1-3 key story components that should be present in this chapter. Choose from the following (or suggest others if relevant to your genre): \
+Plot Advancement: A specific event that moves the main plot or a subplot forward. \
+Character Introduction: The introduction of a significant new character. \
+Character Development: A moment that reveals more about a character's personality, backstory, motivations, or relationships. \
+Setting/Worldbuilding Detail: Introduction or exploration of a specific aspect of the story's world or environment. \
+Conflict/Tension Building: An internal struggle for a character, an interpersonal conflict, or an external threat that increases tension. \
+Rising Action: An event that escalates the central conflict. \
+Climax (can be saved for later chapters): A moment of highest tension or turning point. \
+Falling Action (can be saved for later chapters): Events that follow the climax. \
+Resolution (can be saved for the final chapters): The outcome of the main conflict. \
+Theme Exploration: An event or dialogue that highlights a key theme of the novel. \
+Mystery/Intrigue: A clue discovered, a question raised, or a hint at a central secret. \
+Pacing Indication: Note if the chapter should generally be fast-paced (action, dialogue) or slower (description, reflection). \
+Engagement Hook: Briefly note how to keep the reader engaged in this chapter (e.g., a cliffhanger ending, a surprising revelation, a moment of high emotional impact, a compelling question, a change in perspective). \
+Try to add multiple characters throught story \
+try to add multiple twists throught story which make it engaging \
+Ensure that Chapter 1 effectively introduces the main protagonist(s), their initial situation, and the central conflict or inciting incident that sets the story in motion. The story should build gradually, with each chapter contributing to the overall narrative arc and maintaining reader interest." \
+Also follow below
