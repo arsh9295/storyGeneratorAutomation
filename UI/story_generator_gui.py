@@ -5,6 +5,7 @@ import os
 from tkinter import messagebox
 import subprocess
 import re
+import threading
 
 class SettingsWindow:
     def __init__(self, parent):
@@ -249,13 +250,25 @@ class StoryGeneratorGUI:
             return "", ""
 
     def generate_story(self):
+        def run_subprocess():
+            try:
+                subprocess.run(command, check=True)
+                messagebox.showinfo("Success", "Story generation process started!")
+            except subprocess.CalledProcessError as e:
+                messagebox.showerror("Error", f"An error occurred during story generation: {str(e)}")
+            finally:
+                # Stop the progress bar and close the processing window
+                progress_bar.stop()
+                processing_window.destroy()
+
         language = self.language_var.get()
         story_type = self.story_type_var.get()
         duration = self.duration_var.get()
         ai_model = self.model_var.get()
         description = self.description_text.get("1.0", tk.END).strip()
         prompt = self.prompt_text.get("1.0", tk.END).strip()
-          # Get current settings
+        
+        # Get current settings
         api_key, output_path = self.get_settings()
 
         # Validate required inputs
@@ -266,7 +279,9 @@ class StoryGeneratorGUI:
         try:
             # Get the path to main.py
             backend_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'Backend')
-            main_script = os.path.join(backend_dir, 'main.py')            # Run the backend script with arguments            # Build command with required arguments
+            main_script = os.path.join(backend_dir, 'main.py')
+
+            # Build command with required arguments
             command = [
                 sys.executable,
                 main_script,
@@ -277,17 +292,36 @@ class StoryGeneratorGUI:
                 '--api-key', api_key,
                 '--output-path', output_path
             ]
-            
+
             # Add optional arguments if they are provided
             if description.strip():
                 command.extend(['--description', description])
             if prompt.strip():
                 command.extend(['--prompt', prompt])
-            
-            subprocess.run(command)
-            messagebox.showinfo("Success", "Story generation process started!")
+
+            print("Running command:", ' '.join(command))
+
+            # Create a processing window with a progress bar
+            processing_window = tk.Toplevel(self.root)
+            processing_window.title("Processing")
+            processing_window.geometry("300x150")
+
+            # Center the processing window on the main application window
+            x = self.root.winfo_x() + (self.root.winfo_width() // 2) - 150
+            y = self.root.winfo_y() + (self.root.winfo_height() // 2) - 75
+            processing_window.geometry(f"300x150+{x}+{y}")
+
+            ttk.Label(processing_window, text="Generating story, please wait...").pack(pady=10)
+            progress_bar = ttk.Progressbar(processing_window, mode="indeterminate")
+            progress_bar.pack(pady=10, padx=20, fill=tk.X)
+            progress_bar.start()
+
+            # Run the subprocess in a separate thread
+            thread = threading.Thread(target=run_subprocess)
+            thread.start()
+
         except Exception as e:
-            messagebox.showerror("Error", f"An error occurred: {str(e)}")
+            messagebox.showerror("Error", f"An unexpected error occurred: {str(e)}")
 
     def open_settings(self):
         SettingsWindow(self.root)

@@ -1,7 +1,7 @@
 import os
 from moviepy import ImageClip, concatenate_videoclips, CompositeVideoClip, vfx
 
-def createCombineImages(image_paths, output_path, image_duration=4, transition_duration=1):
+def createCombineImages(image_paths, output_path, image_duration=5, transition_duration=1):
     clips = []
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 

@@ -106,7 +106,10 @@ if tableOfIndex:
     story_name = generate_index.get('novel_name', 'Untitled Novel')
     print(f"Story name: {story_name}")
 
-    writeContentToDoc(f"{outputPath}/{story_name}/{language}/{storyType}/Docs/story.docx", generate_index)
+    finalPath = f"{outputPath}/{language}/{storyType}/{story_name}/"
+
+    writeContentToDoc(f"{finalPath}/Docs/story.docx", story_name)
+    # writeContentToDoc(f"{finalPath}/Docs/story.docx", generate_index)
 
     # Generate description for the story
     descriptionPromptFile = "../Input/Prompts/short/descriptionPrompt.txt"
@@ -114,12 +117,12 @@ if tableOfIndex:
     formattedDescriptionContent = eval(f"f'''{descriptionPromptContent}'''")
     storyDescription = generateStory(formattedDescriptionContent, geminiKey, aiModel)
     if storyDescription:
-        writeContentToDoc(f"{outputPath}/{story_name}/{language}/{storyType}/Docs/storyDescription.docx", storyDescription)
+        writeContentToDoc(f"{finalPath}/Docs/storyDescription.docx", storyDescription)
 
-    with open('../Input/storyName.txt', "w") as file:
+    with open('../Input/storyName.txt', "a") as file:
         file.write(story_name + "\n") 
 
-    finalPath = f"{outputPath}/{story_name}/{language}/{storyType}/"
+    # finalPath = f"{outputPath}/{story_name}/{language}/{storyType}/"
 
     # imageList = []
     if generate_index:
@@ -136,19 +139,21 @@ if tableOfIndex:
                     generatedStory = generateStory(storyPrompt, geminiKey, aiModel)
                     if generatedStory:
                         # Generate voice for the story
-                        writeContentToDoc(f"{outputPath}/{story_name}/{language}/{storyType}/Docs/story.docx", generatedStory)
+                        writeContentToDoc(f"{finalPath}/Docs/story.docx", generatedStory)
 
                         generatedVoice = generateVoice(generatedStory, f"{finalPath}/Audio/", f"chapter_{key}")
 
                         audio = AudioSegment.from_file(generatedVoice)  # or .wav, .ogg, etc.
                         duration_seconds = len(audio) / 1000  # pydub returns length in milliseconds
-                        print(f"Duration: {duration_seconds} seconds")
-                        imageNumber = math.ceil(duration_seconds / 5)  # Assuming you want one image every 5 seconds
+                        print(f"Duration: {duration_seconds} seconds for chapter {key}")
+                        imageNumber = math.ceil(duration_seconds / 4)  # Assuming you want one image every 5 seconds
+                        print(f"Number of images to generate: {imageNumber} for chapter {key}")
                         # Generate image prompt
                         imagePromptFile = "../Input/Prompts/short/ImagePromtp.txt"
                         imagePromptContent = readPromptFile(imagePromptFile)
                         formattedImagePromptContent = eval(f"f'''{imagePromptContent}'''")
                         imagePrompts =  generateStory(formattedImagePromptContent, geminiKey, aiModel)
+                        writeContentToDoc(f"{finalPath}/Docs/prompts.docx", imagePrompts)
                         if imagePrompts:
                             for number, line in enumerate(imagePrompts.split('\n')):
                                 if line.strip():
