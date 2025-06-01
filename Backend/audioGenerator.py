@@ -8,9 +8,9 @@ def generateVoice(inputText, storyPath, fileName):
         result = client.predict(
                 text=inputText,
                 model_name="kokoro-v0_19.pth",
-                voice_name="am_puck",
-                speed=1,
-                pad_between_segments=0,
+                voice_name="am_echo",
+                speed=0.85,
+                pad_between_segments=0.3,
                 remove_silence=False,
                 minimum_silence=0.05,
                 custom_voicepack=None,
@@ -19,7 +19,8 @@ def generateVoice(inputText, storyPath, fileName):
                 # api_name="/toggle_autoplay"        
         )
         if result:
-            moveFile(result, fr"./audio/{storyPath}/{fileName}.wav")
+            fileName = moveFile(result, fr"{storyPath}/{fileName}.wav")
+            return fileName
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
@@ -37,6 +38,6 @@ def moveFile(source_path, destination_path):
         # Move the file
         shutil.move(source_path, destination_path)
         print(f"File moved from {source_path} to {destination_path}")
-        
+        return destination_path
     except Exception as e:
         print(f"Error: {e}")

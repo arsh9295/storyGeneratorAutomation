@@ -1,0 +1,1 @@
+Generate a brief detailed description for the following story: \n {generate_index}
