@@ -209,7 +209,7 @@ class StoryGeneratorGUI:
         ttk.Label(inner_frame, text="AI Model:").grid(row=3, column=0, sticky=tk.E, pady=(0, 5))
         self.model_var = tk.StringVar()
         self.model_combo = ttk.Combobox(inner_frame, textvariable=self.model_var, width=40)
-        self.model_combo['values'] = ('gemini-2.0-flash', 'GPT-4', 'GPT-3.5', 'Claude', 'PaLM')
+        self.model_combo['values'] = ('gemini-2.0-flash', 'gemini-2.5-flash-preview-05-20', 'GPT-4', 'GPT-3.5', 'Claude', 'PaLM')
         self.model_combo.grid(row=3, column=1, sticky=tk.W, pady=(0, 5), padx=(10, 0))
         self.model_combo.set('gemini-2.0-flash')
 

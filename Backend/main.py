@@ -10,6 +10,8 @@ from combineImages import createCombineImages
 from combineAudio import combineAudioFiles
 from createVideo import createVideoMviepy
 from writeToDoc import writeContentToDoc
+from generateSRT import generateSRTFromAudio
+from addSubtitle import burn_subtitles_ffmpeg
 
 import argparse
 
@@ -122,6 +124,9 @@ if tableOfIndex:
     with open('../Input/storyName.txt', "a") as file:
         file.write(story_name + "\n") 
 
+    generatedTitleVoice = generateVoice(story_name, f"{finalPath}/Audio/", f"chapter_0")
+    titleImageGen = GenerateImage(f"Write quoted text on image '{story_name}'", f"{finalPath}/Images/", f"chapter_0_0")
+
     # finalPath = f"{outputPath}/{story_name}/{language}/{storyType}/"
 
     # imageList = []
@@ -146,13 +151,18 @@ if tableOfIndex:
                         audio = AudioSegment.from_file(generatedVoice)  # or .wav, .ogg, etc.
                         duration_seconds = len(audio) / 1000  # pydub returns length in milliseconds
                         print(f"Duration: {duration_seconds} seconds for chapter {key}")
-                        imageNumber = math.ceil(duration_seconds / 4)  # Assuming you want one image every 5 seconds
+
+                        # Dynamically calculate image duration
+                        imageNumber = math.ceil(duration_seconds / 5)  # Assuming 5 seconds per image
+                        image_duration = duration_seconds / imageNumber
                         print(f"Number of images to generate: {imageNumber} for chapter {key}")
+                        print(f"Calculated image duration: {image_duration} seconds")
+
                         # Generate image prompt
                         imagePromptFile = "../Input/Prompts/short/ImagePromtp.txt"
                         imagePromptContent = readPromptFile(imagePromptFile)
                         formattedImagePromptContent = eval(f"f'''{imagePromptContent}'''")
-                        imagePrompts =  generateStory(formattedImagePromptContent, geminiKey, aiModel)
+                        imagePrompts = generateStory(formattedImagePromptContent, geminiKey, aiModel)
                         writeContentToDoc(f"{finalPath}/Docs/prompts.docx", imagePrompts)
                         if imagePrompts:
                             for number, line in enumerate(imagePrompts.split('\n')):
@@ -162,6 +172,14 @@ if tableOfIndex:
 
     # Generate video from images
     imageList = getImageList(f"{finalPath}/Images/")
-    createCombineImages(imageList, f"{finalPath}/Videos/chapter_video.mp4", image_duration=4, transition_duration=1)
+    createCombineImages(imageList, f"{finalPath}/Videos/chapter_video.mp4", image_duration=image_duration, transition_duration=1)
     combineAudioFiles(f"{finalPath}/Audio/", f"{finalPath}/Audio/combined/combined_audio.mp3")
     createVideoMviepy(f"{finalPath}/Videos/chapter_video.mp4", f"{finalPath}/Audio/combined/combined_audio.mp3", f"{finalPath}/Videos/final_video.mp4")
+    generateSRTFromAudio(f"{finalPath}/Audio/combined/combined_audio.mp3", "subtitles.srt")
+    # generateSRTFromAudio(f"{finalPath}/Audio/combined/combined_audio.mp3", f"{finalPath}/Videos/subtitles.srt")
+    burn_subtitles_ffmpeg(
+        f"{finalPath}/Videos/final_video.mp4",
+        f"subtitles.srt",
+        # f"{finalPath}/Videos/subtitles.srt",
+        f"{finalPath}/Videos/final_video_with_subtitles.mp4"
+    )
