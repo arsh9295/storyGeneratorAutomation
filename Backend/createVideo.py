@@ -44,7 +44,7 @@ def createVideoMviepy(video_path, audio_path, output_path):
     else:
         print("Video is longer than or equal to audio. Trimming video to match audio.")
         # Trim video if it's longer than audio
-        final_video = video_clip.subclip(0, audio_duration)
+        final_video = video_clip.subclipped(0, audio_duration)
 
     # Set the audio of the video clip
     final_video = final_video.with_audio(audio_clip)

@@ -1,12 +1,12 @@
 import os
 from moviepy import ImageClip, concatenate_videoclips, CompositeVideoClip, vfx
 
-def createCombineImages(image_paths, output_path, image_duration=4, transition_duration=1):
+def createCombineImages(image_paths, output_path, image_duration=5, transition_duration=1):
     clips = []
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     for path in image_paths:
-        clip = ImageClip(path).with_duration(image_duration).with_position('center').with_effects([vfx.CrossFadeIn(1)]).with_effects([vfx.CrossFadeOut(1)])
+        clip = ImageClip(path).with_duration(image_duration).with_position('center').with_effects([vfx.CrossFadeIn(transition_duration)]).with_effects([vfx.CrossFadeOut(transition_duration)])
         clips.append(clip)
 
     final = concatenate_videoclips(clips, method="compose", padding=-transition_duration)
