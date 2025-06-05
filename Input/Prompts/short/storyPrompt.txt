@@ -9,4 +9,5 @@ Generate a {storyType} story chapter based on the following details: \
 - Tone & Mood: [Creepy, suspenseful, terrifying, etc.] \
 - Length: [full chapter] \
 - Story language will be {language} language only so write in that language. \
+- The story output should be properly punctuated. For example put proper comma, fullstop, question mark etc where required. Put according to language, For any language selected. \
 - dont output chapter number or name or discription just write story only.

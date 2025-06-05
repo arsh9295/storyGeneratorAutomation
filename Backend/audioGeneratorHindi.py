@@ -2,26 +2,22 @@ from gradio_client import Client, handle_file
 import shutil
 import os
 
-def generateVoice(inputText, storyPath, fileName, voiceName="am_echo"):
+def generateVoiceHindi(inputText, storyPath, fileName, voiceName="am_echo"):
     try:
-        # client = Client("http://127.0.0.1:7860/")
-        client = Client("http://127.0.0.1:9000/")
+        client = Client("http://127.0.0.1:7860/")
         result = client.predict(
                 text=inputText,
-                model_name="kokoro-v0_19.pth",
-                voice_name=voiceName,
+                Language="Hindi",
+                voice="hm_omega",
                 speed=0.85,
-                pad_between_segments=0.3,
+                # pad_between_segments=0.3,
+                translate_text=False,
                 remove_silence=False,
-                minimum_silence=0.05,
-                custom_voicepack=None,
-                api_name="/text_to_speech"
-                # api_name="/KOKORO_TTS_API"
-                # autoplay=True,
-                # api_name="/toggle_autoplay"        
-        )
+                api_name="/KOKORO_TTS_API_1"
+        )        
+        print(f"Result: {result}")
         if result:
-            fileName = moveFile(result, fr"{storyPath}/{fileName}.wav")
+            fileName = moveFile(result[0], fr"{storyPath}/{fileName}.wav")
             return fileName
     except Exception as e:
         print(f"An error occurred: {e}")

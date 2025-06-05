@@ -5,6 +5,7 @@ import math
 
 from storyGenerator import geminiStoryGenerator
 from audioGenerator import generateVoice
+from audioGeneratorHindi import generateVoiceHindi
 from imageGenerator import GenerateImage
 from combineImages import createCombineImages
 from combineAudio import combineAudioFiles
@@ -42,6 +43,10 @@ if args.output_path:
 
 storyType = args.type if args.type else 'short'
 language = args.language if args.language else 'English'
+if language.lower() == 'english':
+    audioVoice = "am_echo"
+elif language.lower() == 'hindi':
+    audioVoice = "hm_omega"
 aiModel = args.model if args.model else 'gemini-2.0-flash'
 description = args.description if args.description else ''
 prompt = args.prompt if args.prompt else ''
@@ -121,10 +126,14 @@ if tableOfIndex:
     if storyDescription:
         writeContentToDoc(f"{finalPath}/Docs/storyDescription.docx", storyDescription)
 
-    with open('../Input/storyName.txt', "a") as file:
+    with open('../Input/storyName.txt', "a", encoding='utf-8') as file:
         file.write(story_name + "\n") 
 
-    generatedTitleVoice = generateVoice(story_name, f"{finalPath}/Audio/", f"chapter_0")
+    if language.lower() == 'english':
+        generatedTitleVoice = generateVoice(story_name, f"{finalPath}/Audio/", f"chapter_0", audioVoice)
+    if language.lower() == 'hindi':
+        generatedVoice = generateVoiceHindi(story_name, f"{finalPath}/Audio/", f"chapter_0", audioVoice)
+
     titleImageGen = GenerateImage(f"Write quoted text on image '{story_name}'", f"{finalPath}/Images/", f"chapter_0_0")
 
     # finalPath = f"{outputPath}/{story_name}/{language}/{storyType}/"
@@ -145,8 +154,10 @@ if tableOfIndex:
                     if generatedStory:
                         # Generate voice for the story
                         writeContentToDoc(f"{finalPath}/Docs/story.docx", generatedStory)
-
-                        generatedVoice = generateVoice(generatedStory, f"{finalPath}/Audio/", f"chapter_{key}")
+                        if language.lower() == 'english':
+                            generatedVoice = generateVoice(generatedStory, f"{finalPath}/Audio/", f"chapter_{key}", audioVoice)
+                        if language.lower() == 'hindi':
+                            generatedVoice = generateVoiceHindi(generatedStory, f"{finalPath}/Audio/", f"chapter_{key}", audioVoice)
 
                         audio = AudioSegment.from_file(generatedVoice)  # or .wav, .ogg, etc.
                         duration_seconds = len(audio) / 1000  # pydub returns length in milliseconds
