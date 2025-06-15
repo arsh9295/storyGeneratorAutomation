@@ -2,7 +2,7 @@ import whisper
 
 
 def generateSRTFromAudio(audioFileClip, outputSRTPath):
-    model = whisper.load_model("medium")  # "base" or "small", "medium", "large" for higher accuracy
+    model = whisper.load_model("base").to("cuda")  # "base" or "small", "medium", "large" for higher accuracy
     result = model.transcribe(audioFileClip,)
     # Save as .srt
     with open(outputSRTPath, "w", encoding="utf-8") as f:

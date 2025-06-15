@@ -1,0 +1,9 @@
+pydub
+moviepy
+requests
+python-docx
+gradio_client
+openai-whisper
+google-generativeai
+google-genai
+pillow

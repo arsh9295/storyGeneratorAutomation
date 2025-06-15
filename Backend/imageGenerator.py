@@ -5,7 +5,6 @@ from urllib.parse import urlparse
 import shutil
 import os
 
-
 # Fooocus API URL
 API_URL = "http://127.0.0.1:8888/v1/generation/text-to-image"  # NOT /generate
 
@@ -13,14 +12,16 @@ def generateImageFromText(prompt):
 	# Simple working payload
 	payload = {
 		"prompt": prompt,
-		"negative_prompt": "",
+		"negative_prompt": "bad hands, deformed, blurry, jpeg artifacts, ugly, duplicate, morbid, mutilated, extra fingers, mutated hands and fingers, poorly drawn hands and fingers, missing fingers, extra digit, fewer digits, cropped, worst quality, nsfw, lowres, bad anatomy, bad proportions, extra limbs, cloned face, disfigured, gross proportions, malformed limbs, missing arms, missing legs, fused fingers, too many fingers, long neck, cgi, 3d, cartoon, anime, sketch, drawing, painting, illustration, low quality, out of focus, bad lighting, overexposed, underexposed, grainy, pixelated, noisy, artifacts, compression artifacts, watermarks, text, logo, signature, copyright, label, brand, product name",
 		"seed": -1,
 		"sampler": "DPM++ 2M Karras",
-		"steps": 30,
-		"width": 1280,
-		"height": 720,
+		"performance_selection": "Extreme Speed",
+		"aspect_ratios_selection": "768*512",
+		# "style_selections": ["Fooocus V2", "Fooocus Sharp"],
 		"guidance_scale": 7.5,
-		"model": "juggernautXL_version6Rundiffusion.safetensors"  # adjust to a valid one
+		"base_model_name": "juggernautXL_version8Rundiffusion.safetensors",  # adjust to a valid one
+		"save_extension": "jpeg"
+		# "model": "juggernautXL_version6Rundiffusion.safetensors"  # adjust to a valid one
 	}
 
 	print("🚀 Sending request to Fooocus API...")
@@ -51,4 +52,5 @@ def GenerateImage(prompt, outputPath, outputFile):
 		imagePath = urlparse(imageUrl)
 		path = imagePath.path.lstrip('/')  # Remove leading '/'
 		print(path)
-		moveGeneratedImageToDestination(f"C:\AI\Fooocus-API\outputs\{path}", f"{outputPath}/{outputFile}.png")
+		# F:\AI_2\Fooocus-API
+		moveGeneratedImageToDestination(f"F:\AI_2\Fooocus-API\outputs\{path}", f"{outputPath}/{outputFile}.jpeg")

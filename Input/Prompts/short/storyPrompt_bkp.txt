@@ -1,0 +1,12 @@
+Generate a {storyType} story chapter based on the following details: \
+The story is set in a {language} speaking country. \
+Table of Contents: {generate_index} \
+Chapter Title: {value['title']} \
+Chapter Description: {value['description']} \
+Story Context: This chapter is part of a larger {storyType} novel centered on emotionally intense, real-life human drama. The narrative should reflect themes like class disparity, betrayal, family tension, and personal redemption. Maintain continuity with earlier chapters while deepening character emotions and escalating dramatic tension. \
+Writing Style: Raw, emotionally gripping, and atmospheric. Use vivid, realistic descriptions and maintain grounded {storyType} storytelling with moral and emotional complexity. \
+Key Elements to Include: [Specify if any particular scene, character action, or twist is required] \
+Tone & Mood: [Emotional, tense, ironic, tragic, bittersweet, etc.—depending on the scene] \
+Length: Around 300 words per chapter. \
+Story language will be {language} language only so write in that language. \
+Don't output chapter number or name or description just write story only.
