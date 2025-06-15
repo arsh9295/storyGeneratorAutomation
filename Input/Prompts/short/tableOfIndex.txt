@@ -1,5 +1,5 @@
 Generate a structured table of contents for a short story in {language} \
-with 1 chapter as per story description. The short story follows the {storyType} genre. Each chapter should have \
+with 4 chapters as per story description. The short story follows the {storyType} genre. Each chapter should have \
 a compelling title and a brief description summarizing its main events or themes or focus of the chapter and how it contributes to the overall story flow. \
 The titles should be emotionally evocative, grounded in reality, and hint at personal or social conflicts while maintaining suspense and engagement. \
 Ensure the chapters flow logically, gradually building emotional tension, deepening character arcs, and escalating interpersonal or class-based conflict. \

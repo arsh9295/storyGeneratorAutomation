@@ -16,7 +16,7 @@ from addSubtitle import burn_subtitles_ffmpeg
 import argparse
 
 # Default values
-# geminiKey = 'AIzaSyDMXvILt-cAiwjnlzab-fjjclToyZ0D30g'
+# geminiKey = ''
 # outputPath = 'E:/Youtube/Stories'
 
 # Parse command line arguments

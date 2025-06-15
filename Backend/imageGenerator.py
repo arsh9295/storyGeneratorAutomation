@@ -16,7 +16,7 @@ def generateImageFromText(prompt):
 		"seed": -1,
 		"sampler": "DPM++ 2M Karras",
 		"performance_selection": "Extreme Speed",
-		"aspect_ratios_selection": "768*512",
+		"aspect_ratios_selection": "1408*704",
 		# "style_selections": ["Fooocus V2", "Fooocus Sharp"],
 		"guidance_scale": 7.5,
 		"base_model_name": "juggernautXL_version8Rundiffusion.safetensors",  # adjust to a valid one
