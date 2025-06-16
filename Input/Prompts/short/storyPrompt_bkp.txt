@@ -7,6 +7,6 @@ Story Context: This chapter is part of a larger {storyType} novel centered on em
 Writing Style: Raw, emotionally gripping, and atmospheric. Use vivid, realistic descriptions and maintain grounded {storyType} storytelling with moral and emotional complexity. \
 Key Elements to Include: [Specify if any particular scene, character action, or twist is required] \
 Tone & Mood: [Emotional, tense, ironic, tragic, bittersweet, etc.—depending on the scene] \
-Length: Around 300 words per chapter. \
+Length: Around 100 words per chapter. \
 Story language will be {language} language only so write in that language. \
 Don't output chapter number or name or description just write story only.

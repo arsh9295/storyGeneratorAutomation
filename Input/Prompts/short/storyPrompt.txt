@@ -3,6 +3,6 @@ The story is set in a {language} speaking country. \
 Table of Contents: {generate_index} \
 Chapter Title: {value['title']} \
 Chapter Description: {value['description']} \
-Length: Around 1200 words per chapter. \
+Length: Around 100 words per chapter. \
 Story language will be {language} language only so write in that language. \
 Don't output chapter number or name or description just write story only.

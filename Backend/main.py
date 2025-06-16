@@ -10,8 +10,10 @@ from combineImages import createCombineImages
 from combineAudio import combineAudioFiles
 from createVideo import createVideoMviepy
 from writeToDoc import writeContentToDoc
-from generateSRT import generateSRTFromAudio
-from addSubtitle import burn_subtitles_ffmpeg
+# from generateSRT import generateSRTFromAudio
+from generateASS import generateASSWithKaraoke
+# from addSubtitle import burn_subtitles_ffmpeg
+from addSubtitle import burn_ass_subtitles
 
 import argparse
 
@@ -196,11 +198,28 @@ if tableOfIndex:
     total_audio_duration = AudioSegment.from_file(f"{finalPath}/Audio/combined/combined_audio.mp3").duration_seconds
     createCombineImages(imageList, f"{finalPath}/Videos/chapter_video.mp4", ImageDurationInVideo, total_audio_duration, ImagesOnVideoDefined, transition_duration=1)
     createVideoMviepy(f"{finalPath}/Videos/chapter_video.mp4", f"{finalPath}/Audio/combined/combined_audio.mp3", f"{finalPath}/Videos/final_video.mp4")
-    generateSRTFromAudio(f"{finalPath}/Audio/combined/combined_audio.mp3", "subtitles.srt")
-    # generateSRTFromAudio(f"{finalPath}/Audio/combined/combined_audio.mp3", f"{finalPath}/Videos/subtitles.srt")
-    burn_subtitles_ffmpeg(
+    
+    # Generate karaoke-style ASS subtitle file
+    generateASSWithKaraoke(
+        f"{finalPath}/Audio/combined/combined_audio.mp3",
+        f"subtitles.ass"
+    )
+
+# Burn .ass subtitles into the final video
+    burn_ass_subtitles(
         f"{finalPath}/Videos/final_video.mp4",
-        f"subtitles.srt",
-        # f"{finalPath}/Videos/subtitles.srt",
+        f"subtitles.ass",
         f"{finalPath}/Videos/final_video_with_subtitles.mp4"
     )
+
+
+
+
+    # generateSRTFromAudio(f"{finalPath}/Audio/combined/combined_audio.mp3", "subtitles.srt")
+    # # generateSRTFromAudio(f"{finalPath}/Audio/combined/combined_audio.mp3", f"{finalPath}/Videos/subtitles.srt")
+    # burn_subtitles_ffmpeg(
+    #     f"{finalPath}/Videos/final_video.mp4",
+    #     f"subtitles.srt",
+    #     # f"{finalPath}/Videos/subtitles.srt",
+    #     f"{finalPath}/Videos/final_video_with_subtitles.mp4"
+    # )

@@ -4,6 +4,7 @@ requests
 python-docx
 gradio_client
 openai-whisper
+faster-whisper
 google-generativeai
 google-genai
 pillow
