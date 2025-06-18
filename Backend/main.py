@@ -16,8 +16,8 @@ from addSubtitle import burn_subtitles_ffmpeg
 import argparse
 
 # Default values
-# geminiKey = 'AIzaSyBMtNDWcXpmezADEGXH2i_apAW_4mnAftI'
-# outputPath = 'E:\Youtube\Stories'
+# geminiKey = ''
+# outputPath = 'E:/Youtube/Stories'
 
 # Parse command line arguments
 parser = argparse.ArgumentParser(description='Story Generator')
