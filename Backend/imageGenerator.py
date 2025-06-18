@@ -13,14 +13,14 @@ def generateImageFromText(prompt):
 	# Simple working payload
 	payload = {
 		"prompt": prompt,
-		"negative_prompt": "",
+		"negative_prompt": "bad hands, deformed, blurry, jpeg artifacts, ugly, duplicate, morbid, mutilated, extra fingers, mutated hands and fingers, poorly drawn hands and fingers, missing fingers, extra digit, fewer digits, cropped, worst quality, nsfw, lowres, bad anatomy, bad proportions, extra limbs, cloned face, disfigured, gross proportions, malformed limbs, missing arms, missing legs, fused fingers, too many fingers, long neck, cgi, 3d, cartoon, anime, sketch, drawing, painting, illustration, low quality, out of focus, bad lighting, overexposed, underexposed, grainy, pixelated, noisy, artifacts, compression artifacts, watermarks, text, logo, signature, copyright, label, brand, product name",
 		"seed": -1,
 		"sampler": "DPM++ 2M Karras",
-		"steps": 30,
-		"width": 1280,
-		"height": 720,
+		"performance_selection": "Speed", #performance_selection, must be one of Speed, Quality, Extreme Speed default to Speed
+		"aspect_ratios_selection": "1280*720",
 		"guidance_scale": 7.5,
 		"model": "juggernautXL_version6Rundiffusion.safetensors"  # adjust to a valid one
+		# "save_extension": "jpeg"
 	}
 
 	print("🚀 Sending request to Fooocus API...")

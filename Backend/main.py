@@ -2,23 +2,31 @@ import json
 import re
 from pydub import AudioSegment
 import math
+from datetime import datetime
 
 from storyGenerator import geminiStoryGenerator
 from audioGenerator import generateVoice
 from audioGeneratorHindi import generateVoiceHindi
 from imageGenerator import GenerateImage
-from combineImages import createCombineImages
+from videoEffect import createCombineImages
+# from combineImages import createCombineImages
 from combineAudio import combineAudioFiles
 from createVideo import createVideoMviepy
 from writeToDoc import writeContentToDoc
 from generateSRT import generateSRTFromAudio
-from addSubtitle import burn_subtitles_ffmpeg
+from addSubtitle import burn_subtitles_ffmpeg, burn_ass_subtitles
+from createThumbnil import create_thumbnail_with_text
+from generateASS import generateASSWithKaraoke
+from addSubtitle import burn_ass_subtitles
 
 import argparse
 
+start_time = datetime.now()
+print(f"Script started at: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
+
 # Default values
-# geminiKey = 'AIzaSyBMtNDWcXpmezADEGXH2i_apAW_4mnAftI'
-# outputPath = 'E:\Youtube\Stories'
+# geminiKey = ''
+# outputPath = 'E:/Youtube/Stories'
 
 # Parse command line arguments
 parser = argparse.ArgumentParser(description='Story Generator')
@@ -34,6 +42,11 @@ parser.add_argument('--prompt', help='Story prompt')
 args = parser.parse_args()
 
 print("Command line arguments:", args)
+
+ImageDurationInVideo=7
+
+totalImageDurationApply = 0 # Default total image duration in seconds
+additionalImagePath = None  # Path to additional image if needed
 
 # Override defaults with command line arguments if provided
 if args.api_key:
@@ -108,10 +121,16 @@ if tableOfIndex:
     except json.JSONDecodeError as e:
         print(f"Error parsing JSON: {e}")
 
+    storyNameFile = "../Input/storyName.txt"
+    storyNameExists = readPromptFile(storyNameFile)
+
     generate_index = chapter_dict
 
     story_name = generate_index.get('novel_name', 'Untitled Novel')
     print(f"Story name: {story_name}")
+
+    if story_name in storyNameExists:
+        story_name = story_name + "_" + datetime.now().strftime("%Y%m%d_%H%M%S")
 
     finalPath = f"{outputPath}/{language}/{storyType}/{story_name}/"
 
@@ -129,16 +148,30 @@ if tableOfIndex:
     with open('../Input/storyName.txt', "a", encoding='utf-8') as file:
         file.write(story_name + "\n") 
 
-    if language.lower() == 'english':
-        generatedTitleVoice = generateVoice(story_name, f"{finalPath}/Audio/", f"chapter_0", audioVoice)
-    if language.lower() == 'hindi':
-        generatedVoice = generateVoiceHindi(story_name, f"{finalPath}/Audio/", f"chapter_0", audioVoice)
+    # if language.lower() == 'english':
+    #     generatedTitleVoice = generateVoice(story_name, f"{finalPath}/Audio/", f"chapter_0", audioVoice)
+    # if language.lower() == 'hindi':
+    #     generatedVoice = generateVoiceHindi(story_name, f"{finalPath}/Audio/", f"chapter_0", audioVoice)
 
-    titleImageGen = GenerateImage(f"Write quoted text on image '{story_name}'", f"{finalPath}/Images/", f"chapter_0_0")
-
+    # firstImagePrompt = generateStory(f"generate realestic image prompts for story name {story_name}", geminiKey, aiModel)
+    # titleImageGen = GenerateImage(f"{firstImagePrompt}", f"{finalPath}/Images/", f"chapter_0_0")
+    # generateThumbnail = create_thumbnail_with_text(
+    #     image_path=f"{finalPath}/Images/chapter_0_0.png",
+    #     output_path=f"{finalPath}/Images/chapter_0_0.png",
+    #     title_text=f"{story_name}",
+    #     subtitle_text=None,
+    #     font_path_bold="arialbd.ttf",        # Bold font for title
+    #     font_path_regular="arial.ttf",        # Regular font for subtitle
+    #     vAlign="center",
+    #     yOffset=0,
+    #     fill=(255, 255, 255),
+    #     outlineColor=None,
+    #     outlineWidth=2
+    # )
     # finalPath = f"{outputPath}/{story_name}/{language}/{storyType}/"
 
     # imageList = []
+    ImagesOnVideoDefined = False
     if generate_index:
         storyPromptContent = ""
         # Process each chapter
@@ -164,7 +197,7 @@ if tableOfIndex:
                         print(f"Duration: {duration_seconds} seconds for chapter {key}")
 
                         # Dynamically calculate image duration
-                        imageNumber = math.ceil(duration_seconds / 5)  # Assuming 5 seconds per image
+                        imageNumber = math.ceil(duration_seconds / ImageDurationInVideo)  # Assuming 5 seconds per image
                         image_duration = duration_seconds / imageNumber
                         print(f"Number of images to generate: {imageNumber} for chapter {key}")
                         print(f"Calculated image duration: {image_duration} seconds")
@@ -174,23 +207,76 @@ if tableOfIndex:
                         imagePromptContent = readPromptFile(imagePromptFile)
                         formattedImagePromptContent = eval(f"f'''{imagePromptContent}'''")
                         imagePrompts = generateStory(formattedImagePromptContent, geminiKey, aiModel)
+                        imagePrompts = re.sub(r'\n+', '\n', imagePrompts.strip())  # Remove extra newlines
+                        print(f"Number of image prompts: {len(imagePrompts)} for chapter {key}")
                         writeContentToDoc(f"{finalPath}/Docs/prompts.docx", imagePrompts)
-                        if imagePrompts:
-                            for number, line in enumerate(imagePrompts.split('\n')):
-                                if line.strip():
-                                    # Generate image from the prompt
-                                    imageGen = GenerateImage(line.strip(), f"{finalPath}/Images/", f"chapter_{key}_{number}")
+                        if totalImageDurationApply > 0:
+                            ImagesOnVideoDefined = True
+                            print(f"Images on video defined for chapter {key}")
+                            if key == '1':
+                                numberOfImagesToGenerate = math.ceil(totalImageDurationApply / ImageDurationInVideo)
+                                count = 0
+                                if imagePrompts:
+                                    for number, line in enumerate(imagePrompts.split('\n')):
+                                        if line.strip():
+                                            count += 1
+                                            if count > numberOfImagesToGenerate:
+                                                break
+                                            imageGen = GenerateImage(line.strip(), f"{finalPath}/Images/", f"chapter_{key}_{number}")
+                        else:
+                            print(f"Total image duration is 0")
+                            if imagePrompts:
+                                for number, line in enumerate(imagePrompts.split('\n')):
+                                    if line.strip():
+                                        imageGen = GenerateImage(line.strip(), f"{finalPath}/Images/", f"chapter_{key}_{number}")
 
     # Generate video from images
     imageList = getImageList(f"{finalPath}/Images/")
-    createCombineImages(imageList, f"{finalPath}/Videos/chapter_video.mp4", image_duration=image_duration, transition_duration=1)
     combineAudioFiles(f"{finalPath}/Audio/", f"{finalPath}/Audio/combined/combined_audio.mp3")
+    total_audio_duration = AudioSegment.from_file(f"{finalPath}/Audio/combined/combined_audio.mp3").duration_seconds
+    # createCombineImages(imageList, f"{finalPath}/Videos/chapter_video.mp4", ImageDurationInVideo, total_audio_duration, ImagesOnVideoDefined, additionalImagePath, transition_duration=1)
+
+    createCombineImages(
+            image_paths=imageList,
+            output_path=f"{finalPath}/Videos/chapter_video.mp4",
+            image_duration=ImageDurationInVideo,
+            audio_duration=total_audio_duration,
+            ImagesOnVideoDefined=ImagesOnVideoDefined,
+            additionalImagePath=additionalImagePath,
+            transition_duration=1,
+            fps=30
+        )
+
     createVideoMviepy(f"{finalPath}/Videos/chapter_video.mp4", f"{finalPath}/Audio/combined/combined_audio.mp3", f"{finalPath}/Videos/final_video.mp4")
-    generateSRTFromAudio(f"{finalPath}/Audio/combined/combined_audio.mp3", "subtitles.srt")
-    # generateSRTFromAudio(f"{finalPath}/Audio/combined/combined_audio.mp3", f"{finalPath}/Videos/subtitles.srt")
-    burn_subtitles_ffmpeg(
+
+    # Generate karaoke-style ASS subtitle file
+    generateASSWithKaraoke(
+        f"{finalPath}/Audio/combined/combined_audio.mp3",
+        f"subtitles.ass"
+    )
+
+    # Burn .ass subtitles into the final video
+    burn_ass_subtitles(
         f"{finalPath}/Videos/final_video.mp4",
-        f"subtitles.srt",
-        # f"{finalPath}/Videos/subtitles.srt",
+        f"subtitles.ass",
         f"{finalPath}/Videos/final_video_with_subtitles.mp4"
     )
+
+    # Thumbnail Image
+    thumbnailImageGen = GenerateImage(f"Create a realistic thumbnail image for the story name '{story_name}'", f"{finalPath}/Images/", f"thumbnail")
+    generateThumbnail = create_thumbnail_with_text(
+        image_path=f"{finalPath}/Images/thumbnail.png",
+        output_path=f"{finalPath}/Images/final_thumbnail.png",
+        title_text=f"{story_name}",
+        subtitle_text="A Supernatural Story",
+        font_path_bold="arialbd.ttf",        # Bold font for title
+        font_path_regular="arial.ttf"        # Regular font for subtitle
+    )
+
+# Record end time
+end_time = datetime.now()
+print(f"Script ended at: {end_time.strftime('%Y-%m-%d %H:%M:%S')}")
+
+# Calculate and print duration
+duration = end_time - start_time
+print(f"Total duration: {duration}")

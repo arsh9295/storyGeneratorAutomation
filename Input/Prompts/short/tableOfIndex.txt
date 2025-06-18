@@ -1,5 +1,5 @@
 Generate a structured table of contents for a story in {language} \
-with around 4 to 5 chapters. The novel follows the {storyType} genre. Each chapter should have \
+with 4 chapters. The novel follows the {storyType} genre. Each chapter should have \
 a compelling title and a brief description summarizing its main events or themes or focus of the chapter and how it contributes to the overall story flow.. \
 The titles should be engaging and hint at key plot points while maintaining suspense and excitement. \
 Ensure the chapters flow logically, gradually building tension and developing the story. \

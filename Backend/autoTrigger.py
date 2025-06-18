@@ -1,6 +1,10 @@
 import os
 import sys
 import subprocess
+import time
+
+
+#time.sleep(3600)
 
 backend_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'Backend')
 main_script = os.path.join(backend_dir, 'main.py')
@@ -12,7 +16,7 @@ command = [
     '--language', "English",
     '--type', "Supernatural",
     '--duration', "Short",
-    '--model', "gemini-2.5-flash-preview-05-20",
+    '--model', "gemini-2.0-flash",
     '--api-key', "AIzaSyBMtNDWcXpmezADEGXH2i_apAW_4mnAftI",
     '--output-path', "E:\Youtube\Stories"
 ]
