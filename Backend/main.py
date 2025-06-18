@@ -18,7 +18,7 @@ from addSubtitle import burn_ass_subtitles
 import argparse
 
 # Default values
-# geminiKey = ''
+# geminiKey = 'AIzaSyDMXvILt-cAiwjnlzab-fjjclToyZ0D30g'
 # outputPath = 'E:/Youtube/Stories'
 
 # Parse command line arguments

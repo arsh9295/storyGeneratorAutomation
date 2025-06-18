@@ -15,7 +15,7 @@ def generateImageFromText(prompt):
 		"negative_prompt": "bad hands, deformed, blurry, jpeg artifacts, ugly, duplicate, morbid, mutilated, extra fingers, mutated hands and fingers, poorly drawn hands and fingers, missing fingers, extra digit, fewer digits, cropped, worst quality, nsfw, lowres, bad anatomy, bad proportions, extra limbs, cloned face, disfigured, gross proportions, malformed limbs, missing arms, missing legs, fused fingers, too many fingers, long neck, cgi, 3d, cartoon, anime, sketch, drawing, painting, illustration, low quality, out of focus, bad lighting, overexposed, underexposed, grainy, pixelated, noisy, artifacts, compression artifacts, watermarks, text, logo, signature, copyright, label, brand, product name",
 		"seed": -1,
 		"sampler": "DPM++ 2M Karras",
-		"performance_selection": "Extreme Speed",
+		"performance_selection": "Speed",
 		"aspect_ratios_selection": "768*512",
 		# "aspect_ratios_selection": "1408*704",
 		"style_selections": ["Fooocus V2", "Fooocus Sharp"],
