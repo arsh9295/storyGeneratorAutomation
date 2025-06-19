@@ -19,16 +19,16 @@ def generateASSWithKaraoke(audioFileClip, outputASSPath):
         f.write("[Script Info]\n")
         f.write("Title: Word Pop Subtitles\n")
         f.write("ScriptType: v4.00+\n")
-        f.write("PlayResX: 1280\n")
-        f.write("PlayResY: 720\n\n")
+        f.write("PlayResX: 1080\n")
+        f.write("PlayResY: 1920\n\n")
 
         # Styles
         f.write("[V4+ Styles]\n")
         f.write("Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour,"
                 "BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle,"
                 "BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n")
-        f.write("Style: WordPop,Arial,48,&H00FFFFFF,&H0000FFFF,&H00000000,&H64000000,"
-                "-1,0,0,0,100,100,0,0,1,3,1,2,30,30,30,1\n\n")
+        f.write("Style: WordPop,Arial,20,&H00FFFFFF,&H0000FFFF,&H00000000,&H64000000,"
+                "-1,0,0,0,100,100,0,0,1,3,1,5,30,30,30,1\n\n")
 
         # Events
         f.write("[Events]\n")

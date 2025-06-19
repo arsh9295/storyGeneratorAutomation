@@ -1,0 +1,14 @@
+Generate a {storyType} story chapter based on the following details: \
+- The story is set in a {language} speaking country. \
+- Table of Contents: {generate_index} \
+- Chapter Title: {value['title']} \
+- Chapter Description: {value['description']} \
+- Story Context: This chapter is part of a larger {storyType} novel. The atmosphere should be eerie, suspenseful, and immersive. Maintain consistency with previous chapters while gradually building tension. \
+- Writing Style: Dark, intense, and atmospheric, with vivid descriptions and {storyType} elements. \
+- Key Elements to Include: [Specify if any particular scene, character action, or twist is required] \
+- Tone & Mood: [Creepy, suspenseful, terrifying, etc.] \
+- Length: [full chapter] \
+- Story language will be {language} language only so write in that language. \
+- The story output should be properly punctuated. For example put proper comma, fullstop, question mark etc where required. Put according to language, For any language selected. \
+- dont output chapter number or name or discription just write story only. \
+- It should have aprox 300 words.

@@ -17,7 +17,7 @@ def generateImageFromText(prompt):
 		"seed": -1,
 		"sampler": "DPM++ 2M Karras",
 		"performance_selection": "Speed", #performance_selection, must be one of Speed, Quality, Extreme Speed default to Speed
-		"aspect_ratios_selection": "1280*720",
+		"aspect_ratios_selection": "1080*1920",
 		"guidance_scale": 7.5,
 		"model": "juggernautXL_version6Rundiffusion.safetensors"  # adjust to a valid one
 		# "save_extension": "jpeg"

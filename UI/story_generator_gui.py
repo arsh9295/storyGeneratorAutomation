@@ -200,7 +200,7 @@ class StoryGeneratorGUI:
         ttk.Label(inner_frame, text="Story Duration:").grid(row=2, column=0, sticky=tk.E, pady=(0, 5))
         self.duration_var = tk.StringVar()
         self.duration_combo = ttk.Combobox(inner_frame, textvariable=self.duration_var, width=40)
-        self.story_type_combo['values'] = ('Short', 'Medium', 'Long', 'Very Short', 'Very Long')
+        self.duration_combo['values'] = ('shortsVideos', 'Short', 'Medium', 'Long', 'Very Short', 'Very Long')
         # self.duration_combo['values'] = ('5 minutes', '10 minutes', '15 minutes', '20 minutes', '30 minutes')
         self.duration_combo.grid(row=2, column=1, sticky=tk.W, pady=(0, 5), padx=(10, 0))
         self.duration_combo.set('Short')

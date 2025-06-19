@@ -1,6 +1,7 @@
 Generate a structured table of contents for a story in {language} \
-with 4 chapters. The novel follows the {storyType} genre. Each chapter should have \
+with 1 chapters. The novel follows the {storyType} genre. Each chapter should have \
 a compelling title and a brief description summarizing its main events or themes or focus of the chapter and how it contributes to the overall story flow.. \
+It should have aprox 300 words \
 The titles should be engaging and hint at key plot points while maintaining suspense and excitement. \
 Ensure the chapters flow logically, gradually building tension and developing the story. \
 Return the result as a dictionary where keys are chapter numbers (as integers), and values are \
@@ -25,4 +26,3 @@ try to add multiple twists throught story which make it engaging \
 Ensure that Chapter 1 effectively introduces the main protagonist(s), their initial situation, and the central conflict or inciting incident that sets the story in motion. The story should build gradually, with each chapter contributing to the overall narrative arc and maintaining reader interest." \
 Novel name should not be any of { storyNameExists } \
 Novel name should not be "Veil of Whispers"
-Also follow below

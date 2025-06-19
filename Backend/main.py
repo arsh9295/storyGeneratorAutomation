@@ -26,7 +26,7 @@ print(f"Script started at: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
 
 # Default values
 # geminiKey = ''
-# outputPath = 'E:/Youtube/Stories'
+# outputPath = 'E:/Youtube/Stories/shorts'
 
 # Parse command line arguments
 parser = argparse.ArgumentParser(description='Story Generator')
@@ -70,16 +70,16 @@ def readPromptFile(filePath):
     return content
 
 def generateTableOfContents(apiKey, language, storyType, model):
-    tableIndexPromptFilePath = "../Input/Prompts/short/tableOfIndex.txt"
+    tableIndexPromptFilePath = "../Input/Prompts/shortsVideos/tableOfIndex.txt"
     promptContent = readPromptFile(tableIndexPromptFilePath)
 
-    chapterDescriptionPromptFile = "../Input/Prompts/short/chapterDescription.txt"
+    chapterDescriptionPromptFile = "../Input/Prompts/shortsVideos/chapterDescription.txt"
     chapterDescriptionContent = readPromptFile(chapterDescriptionPromptFile)
 
     storyNameFile = "../Input/storyName.txt"
     storyNameExists = readPromptFile(storyNameFile)
 
-    formatted_content = eval(f"f'''{promptContent}\n{chapterDescriptionContent}'''")
+    formatted_content = eval(f"f'''{promptContent}'''")
 
     tableOfContents = geminiStoryGenerator(
         apiKey  = apiKey,
@@ -122,7 +122,7 @@ if tableOfIndex:
         print(f"Error parsing JSON: {e}")
 
     storyNameFile = "../Input/storyName.txt"
-    storyNameExists = readPromptFile(storyNameFile)
+    storyNameExists = readPromptFile(storyNameFile).replace('\n', '').split(',')
 
     generate_index = chapter_dict
 
@@ -138,7 +138,7 @@ if tableOfIndex:
     # writeContentToDoc(f"{finalPath}/Docs/story.docx", generate_index)
 
     # Generate description for the story
-    descriptionPromptFile = "../Input/Prompts/short/descriptionPrompt.txt"
+    descriptionPromptFile = "../Input/Prompts/shortsVideos/descriptionPrompt.txt"
     descriptionPromptContent = readPromptFile(descriptionPromptFile)
     formattedDescriptionContent = eval(f"f'''{descriptionPromptContent}'''")
     storyDescription = generateStory(formattedDescriptionContent, geminiKey, aiModel)
@@ -178,7 +178,7 @@ if tableOfIndex:
         for key, value in generate_index.items():
             if key != 'novel_name':  # Skip the novel name entry
                 if isinstance(value, dict) and 'title' in value:
-                    storyPromptFile = "../Input/Prompts/short/storyPrompt.txt"
+                    storyPromptFile = "../Input/Prompts/shortsVideos/storyPrompt.txt"
                     storyPromptContent = readPromptFile(storyPromptFile)
                     formattedContent = eval(f"f'''{storyPromptContent}'''")
                     storyPrompt = formattedContent
@@ -203,7 +203,7 @@ if tableOfIndex:
                         print(f"Calculated image duration: {image_duration} seconds")
 
                         # Generate image prompt
-                        imagePromptFile = "../Input/Prompts/short/ImagePromtp.txt"
+                        imagePromptFile = "../Input/Prompts/shortsVideos/ImagePromtp.txt"
                         imagePromptContent = readPromptFile(imagePromptFile)
                         formattedImagePromptContent = eval(f"f'''{imagePromptContent}'''")
                         imagePrompts = generateStory(formattedImagePromptContent, geminiKey, aiModel)
@@ -247,7 +247,7 @@ if tableOfIndex:
             fps=30
         )
 
-    createVideoMviepy(f"{finalPath}/Videos/chapter_video.mp4", f"{finalPath}/Audio/combined/combined_audio.mp3", f"{finalPath}/Videos/final_video.mp4")
+    createVideoMviepy(f"{finalPath}/Videos/chapter_video.mp4", f"{finalPath}/Audio/combined/combined_audio.mp3", f"{finalPath}/Videos/final_video.mp4", "E:/Youtube/music1.mp3")
 
     # Generate karaoke-style ASS subtitle file
     generateASSWithKaraoke(

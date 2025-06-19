@@ -15,9 +15,9 @@ command = [
     main_script,
     '--language', "English",
     '--type', "Supernatural",
-    '--duration', "Short",
+    '--duration', "shortsVideos",
     '--model', "gemini-2.0-flash",
-    '--api-key', "AIzaSyBMtNDWcXpmezADEGXH2i_apAW_4mnAftI",
+    '--api-key', "AIzaSyAHMRaTIXBT5vBqK7eKRS5u858_BCxBEBI",
     '--output-path', "E:\Youtube\Stories"
 ]
 
