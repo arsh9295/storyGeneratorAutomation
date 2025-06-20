@@ -3,6 +3,8 @@ import re
 from pydub import AudioSegment
 import math
 from datetime import datetime
+import os
+import random
 
 from storyGenerator import geminiStoryGenerator
 from audioGenerator import generateVoice
@@ -25,7 +27,7 @@ start_time = datetime.now()
 print(f"Script started at: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
 
 # Default values
-# geminiKey = ''
+# geminiKey = 'AIzaSyDMXvILt-cAiwjnlzab-fjjclToyZ0D30g'
 # outputPath = 'E:/Youtube/Stories'
 
 # Parse command line arguments
@@ -47,6 +49,10 @@ ImageDurationInVideo=7
 
 totalImageDurationApply = 0 # Default total image duration in seconds
 additionalImagePath = None  # Path to additional image if needed
+
+current_file = os.path.abspath(__file__)
+parent_dir = os.path.dirname(os.path.dirname(current_file))
+# parent_dir = os.path.dirname(os.getcwd())
 
 # Override defaults with command line arguments if provided
 if args.api_key:
@@ -70,14 +76,16 @@ def readPromptFile(filePath):
     return content
 
 def generateTableOfContents(apiKey, language, storyType, model):
-    tableIndexPromptFilePath = "../Input/Prompts/short/tableOfIndex.txt"
+    tableIndexPromptFilePath = f"{parent_dir}/Input/Prompts/short/tableOfIndex.txt"
     promptContent = readPromptFile(tableIndexPromptFilePath)
 
-    chapterDescriptionPromptFile = "../Input/Prompts/short/chapterDescription.txt"
+    chapterDescriptionPromptFile = f"{parent_dir}/Input/Prompts/short/chapterDescription.txt"
     chapterDescriptionContent = readPromptFile(chapterDescriptionPromptFile)
 
-    storyNameFile = "../Input/storyName.txt"
-    storyNameExists = readPromptFile(storyNameFile)
+    storyNameFile = f"{parent_dir}/Input/storyName.txt"
+    storyNameExists = readPromptFile(storyNameFile).replace('\n', '').split(',')
+
+    print(f"Story name exists: {storyNameExists}")
 
     formatted_content = eval(f"f'''{promptContent}\n{chapterDescriptionContent}'''")
 
@@ -121,7 +129,7 @@ if tableOfIndex:
     except json.JSONDecodeError as e:
         print(f"Error parsing JSON: {e}")
 
-    storyNameFile = "../Input/storyName.txt"
+    storyNameFile = f"{parent_dir}/Input/storyName.txt"
     storyNameExists = readPromptFile(storyNameFile)
 
     generate_index = chapter_dict
@@ -138,15 +146,15 @@ if tableOfIndex:
     # writeContentToDoc(f"{finalPath}/Docs/story.docx", generate_index)
 
     # Generate description for the story
-    descriptionPromptFile = "../Input/Prompts/short/descriptionPrompt.txt"
+    descriptionPromptFile = f"{parent_dir}/Input/Prompts/short/descriptionPrompt.txt"
     descriptionPromptContent = readPromptFile(descriptionPromptFile)
     formattedDescriptionContent = eval(f"f'''{descriptionPromptContent}'''")
     storyDescription = generateStory(formattedDescriptionContent, geminiKey, aiModel)
     if storyDescription:
         writeContentToDoc(f"{finalPath}/Docs/storyDescription.docx", storyDescription)
 
-    with open('../Input/storyName.txt', "a", encoding='utf-8') as file:
-        file.write(story_name + "\n") 
+    with open(f"{parent_dir}/Input/storyName.txt", "a", encoding='utf-8') as file:
+        file.write(story_name + "\n")
 
     # if language.lower() == 'english':
     #     generatedTitleVoice = generateVoice(story_name, f"{finalPath}/Audio/", f"chapter_0", audioVoice)
@@ -178,7 +186,7 @@ if tableOfIndex:
         for key, value in generate_index.items():
             if key != 'novel_name':  # Skip the novel name entry
                 if isinstance(value, dict) and 'title' in value:
-                    storyPromptFile = "../Input/Prompts/short/storyPrompt.txt"
+                    storyPromptFile = f"{parent_dir}/Input/Prompts/short/storyPrompt.txt"
                     storyPromptContent = readPromptFile(storyPromptFile)
                     formattedContent = eval(f"f'''{storyPromptContent}'''")
                     storyPrompt = formattedContent
@@ -203,7 +211,7 @@ if tableOfIndex:
                         print(f"Calculated image duration: {image_duration} seconds")
 
                         # Generate image prompt
-                        imagePromptFile = "../Input/Prompts/short/ImagePromtp.txt"
+                        imagePromptFile = f"{parent_dir}/Input/Prompts/short/ImagePromtp.txt"
                         imagePromptContent = readPromptFile(imagePromptFile)
                         formattedImagePromptContent = eval(f"f'''{imagePromptContent}'''")
                         imagePrompts = generateStory(formattedImagePromptContent, geminiKey, aiModel)
@@ -247,7 +255,9 @@ if tableOfIndex:
             fps=30
         )
 
-    createVideoMviepy(f"{finalPath}/Videos/chapter_video.mp4", f"{finalPath}/Audio/combined/combined_audio.mp3", f"{finalPath}/Videos/final_video.mp4")
+    musicFileName = random.choice(get_all_files("E:/Youtube/storyMusic/"))
+
+    createVideoMviepy(f"{finalPath}/Videos/chapter_video.mp4", f"{finalPath}/Audio/combined/combined_audio.mp3", f"{finalPath}/Videos/final_video.mp4", musicFileName)
 
     # Generate karaoke-style ASS subtitle file
     generateASSWithKaraoke(

@@ -24,4 +24,5 @@ Try to add multiple characters throught story \
 try to add multiple twists throught story which make it engaging \
 Ensure that Chapter 1 effectively introduces the main protagonist(s), their initial situation, and the central conflict or inciting incident that sets the story in motion. The story should build gradually, with each chapter contributing to the overall narrative arc and maintaining reader interest." \
 Novel name should not be any of { storyNameExists } \
+Novel name should not be "Veil of Whispers" \
 Also follow below
