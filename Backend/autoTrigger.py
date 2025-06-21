@@ -18,11 +18,11 @@ command = [
     '--duration', "shortsVideos",
     '--model', "gemini-2.0-flash",
     '--api-key', "AIzaSyAHMRaTIXBT5vBqK7eKRS5u858_BCxBEBI",
-    '--output-path', "E:\Youtube\Stories"
+    '--output-path', "E:\Youtube\Stories\shorts"
 ]
 
 # while True:
-for i in range(10):
+for i in range(50):
     subprocess.run(command, check=True)
 
     # if result.returncode == 0:

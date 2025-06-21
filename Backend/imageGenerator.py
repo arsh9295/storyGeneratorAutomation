@@ -51,4 +51,4 @@ def GenerateImage(prompt, outputPath, outputFile):
 		imagePath = urlparse(imageUrl)
 		path = imagePath.path.lstrip('/')  # Remove leading '/'
 		print(path)
-		moveGeneratedImageToDestination(f"C:\AI\Fooocus-API\outputs\{path}", f"{outputPath}/{outputFile}.png")
+		moveGeneratedImageToDestination(f"C:/AI/Fooocus-API/outputs/{path}", f"{outputPath}/{outputFile}.png")
