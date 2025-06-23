@@ -1,0 +1,57 @@
+import os, random, sys
+import numpy as np
+from moviepy import ImageClip, VideoClip, concatenate_videoclips
+from moviepy.video.fx import FadeIn, FadeOut
+
+from lib.videoLib.effects.zoomEffect import make_zoom_clip
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+import globalVariables as gv
+
+def combineImages(image_paths, output_path, audio_duration,
+                        imageDuration=None,
+                        slidDurationInImage=None, additionalImagePath=None,
+                        transitionDuration=None, fps=None, videoCode=None, videoPreset=None, finalVideoSize=None, imageCombineMethod=None, videoThreds=None, zoomStrength=None):
+
+    imageDuration = imageDuration if imageDuration is not None else getattr(gv, 'perImageDuration', 7)
+    slidDurationInImage = slidDurationInImage if slidDurationInImage is not None else getattr(gv, 'slidDurationInImage', 0)
+    additionalImagePath = additionalImagePath if additionalImagePath is not None else getattr(gv, 'additionalImagePath', None)
+    imageCombineMethod = imageCombineMethod if imageCombineMethod is not None else getattr(gv, 'imageCombineMethod', 'chain')
+    transitionDuration = transitionDuration if transitionDuration is not None else getattr(gv, 'transitionDuration', 1)
+    videoCode = videoCode if videoCode is not None else getattr(gv, 'videoCode', 'libx264')
+    videoPreset = videoPreset if videoPreset is not None else getattr(gv, 'videoPreset', 'ultrafast')
+    videoThreds = videoThreds if videoThreds is not None else getattr(gv, 'videoThreds', 16)
+    zoomStrength = zoomStrength if zoomStrength is not None else getattr(gv, 'zoomStrength', 0.1)
+    fps = fps if fps is not None else getattr(gv, 'fps', 24)
+    finalVideoSize = finalVideoSize if finalVideoSize is not None else getattr(gv, 'finalVideoSize', None)
+
+    ImagesOnVideoDefined = True if slidDurationInImage > 0 else False
+
+
+    os.makedirs(os.path.dirname(output_path) or '.', exist_ok=True)
+    n = len(image_paths)
+    if not ImagesOnVideoDefined:
+        imageDuration = (audio_duration + (n - 1) * transitionDuration) / n
+
+    clips = []
+    
+    for p in image_paths:
+        clips.append(make_zoom_clip(p, imageDuration, fps,
+                                    transitionDuration, zoomStrength))
+        if finalVideoSize:
+            clip = clip.resized(new_size=finalVideoSize)
+            clips.append(clip)
+
+    if additionalImagePath:
+        additional_clip = ImageClip(additionalImagePath).with_duration(imageDuration).with_position('center').with_effects([vfx.CrossFadeIn(transitionDuration)]).with_effects([vfx.CrossFadeOut(transitionDuration)])
+        if finalVideoSize:
+            additional_clip = additional_clip.resized(new_size=finalVideoSize)
+        additional_clip = additional_clip.with_effects([vfx.CrossFadeIn(transitionDuration), vfx.CrossFadeOut(transitionDuration)])
+        clips.append(additional_clip)    
+
+    final = concatenate_videoclips(clips, method=imageCombineMethod, padding=-transitionDuration)
+    final.write_videofile(output_path,
+                          fps=fps, codec=videoCode,
+                          preset=videoPreset, threads=videoThreds)
+
+
