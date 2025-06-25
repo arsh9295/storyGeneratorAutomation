@@ -47,7 +47,7 @@ def generateASSWithKaraoke(
     pop_duration_ms = pop_duration_ms if pop_duration_ms is not None else getattr(gv, 'pop_duration_ms', 100)
     zoom_font_size = zoom_font_size if zoom_font_size is not None else getattr(gv, 'zoom_font_size', 48)
 
-
+    print("Creating ass started...")
     # Load Whisper model
     model = WhisperModel(model_name, device=device, compute_type=compute_type)
     segments, _ = model.transcribe(audioFilePath, word_timestamps=True)
@@ -100,3 +100,6 @@ def generateASSWithKaraoke(
                 dialogue_line += f"{pop_tag}{clean_word} "
 
             f.write(f"Dialogue: 0,{start},{end},{style_name},,0,0,0,,{dialogue_line.strip()}\n")
+
+        print("Creating ass Completed...")
+        

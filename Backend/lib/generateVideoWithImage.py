@@ -9,16 +9,14 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import globalVariables as gv
 
 from lib.utilLib.getAllFilesInProvidedPath import getAllFilesInProvidedPath
-from lib.videoLib.combineAudio import combineAudioFiles
 from lib.videoLib.combineImages import combineImages
 from lib.videoLib.createVideo import createVideoMviepy
 
 
-def generateVideoWithImages(finalPath):
+def generateVideoWithImages(finalPath, imageDurationEachImage):
     imageList = getAllFilesInProvidedPath(f"{finalPath}/Images/")
-    createCombineAudio = combineAudioFiles(f"{finalPath}/Audio/", f"{finalPath}/Audio/combined/combined_audio.mp3")
     totalAudioDuration = AudioSegment.from_file(f"{finalPath}/Audio/combined/combined_audio.mp3").duration_seconds
-    createCombineImages = combineImages(imageList, f"{finalPath}/Videos/chapter_video.mp4", totalAudioDuration)
+    createCombineImages = combineImages(imageList, f"{finalPath}/Videos/chapter_video.mp4", totalAudioDuration, imageDurationEachImage)
     if gv.addMusic:
         musicFileName = gv.musicPath if os.path.isfile(gv.musicPath) else random.choice(getAllFilesInProvidedPath(gv.musicPath))
         musicFileName = musicFileName if os.path.isfile(musicFileName) else None

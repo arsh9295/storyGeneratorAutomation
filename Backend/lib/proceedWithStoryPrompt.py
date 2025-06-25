@@ -80,5 +80,7 @@ def proceedWithStoryPrompt():
         storyName, storyTitle, story_name_folder = generateStoryName(storyText)
         finalOutputPath = f"{gv.outputPath}/{story_name_folder}"
         generatedAudioDuration = processAudio(storyText, finalOutputPath, storyName)
-        processingImage(generatedAudioDuration, finalOutputPath, "1", storyText)
+        generatefromsrt = (getattr(gv, 'createImageFromSRT') and (gv.createImageFromSRT)) and (gv.addSubtitle)
+        if not(generatefromsrt):
+            processingImage(generatedAudioDuration, finalOutputPath, "1", storyText)
         return storyName, storyTitle, finalOutputPath

@@ -6,6 +6,11 @@ import globalVariables as gv
 from lib.generateVideoWithImage import generateVideoWithImages
 from lib.processVideoSubtitle import videoSubtitle
 from lib.generateThumbnil import createThumbnil
+from lib.audioLib.combineAudio import combineAudioFiles
+from lib.subtitleLib.generateSubtitle import generateASSWithKaraoke
+from lib.subtitleLib.convertAssToSrt import convertAssToSrtManual
+from lib.processImageFromSRT import processSRTFromImage
+from lib.videoLib.youtubeUpload import initializeUpload
 from datetime import datetime
 
 # Configure the logger
@@ -49,12 +54,33 @@ elif videoGenerationMode == "FromStoryPrompt":
 else:
     raise ValueError("Invalid Video Generation Mode: expected a value from FromStoryGeneratedFile, FromStoryPrompt, FromTableOfIndex")
 
+# storyName = "Name is: TheAetheriumEcho"
+# storyTitle = "Grief-stricken Elara steals a Lens, facing spirits and the Shade King. A dark pact leads to a choice: protect the Veil or succumb to darkness."
+# finalPath = "E:/Youtube/Stories/test/english/supernatural/TheAetheriumEcho/"
+
 logging.info(f"Story Name is: {storyName}")
 logging.info(f"Story Title is: {storyTitle}")
 logging.info(f"Story Path is: {finalPath}")
 
+# Combine Audio
+createCombineAudio = combineAudioFiles(f"{finalPath}/Audio/", f"{finalPath}/Audio/combined/combined_audio.mp3")
+
+if gv.addSubtitle:
+    logging.info(f"Generating and adding subtitle")
+    storyName = storyName.strip()
+    subTitleFileName = storyName.replace(" ","_")
+    # Generate SRT
+    generateASSWithKaraoke(f"{finalPath}/Audio/combined/combined_audio.mp3", f"{subTitleFileName}_subtitles.ass")
+
+imageDuration = None
+
+if (gv.addSubtitle) and (gv.createImageFromSRT):
+    # Generate Image if from SRT
+    convertAssToSrtManual(f"{subTitleFileName}_subtitles.ass", f"{subTitleFileName}_subtitles.srt")
+    imageDuration = processSRTFromImage(f"{subTitleFileName}_subtitles.srt", f"{finalPath}", "1")
+
 # Generate Video
-generateVideoWithImages(finalPath)
+generateVideoWithImages(finalPath, imageDuration)
 
 # Generate Subtitle
 if gv.addSubtitle:
@@ -67,6 +93,8 @@ if gv.generateThumbnil:
     logging.info(f"Generating Thumbnil")
     generateThumbnail = createThumbnil( prompt=f"{storyTitle}", imageFileName = "thumbnail", finalImageFileName = "final_thumbnail.png", image_path=f"{finalPath}/Images/", title_text=f"{storyTitle}")
 
+if getattr(gv, 'uploadToYoutube') and gv.uploadToYoutube == True:
+    initializeUpload()
 # Record end time
 end_time = datetime.now()
 

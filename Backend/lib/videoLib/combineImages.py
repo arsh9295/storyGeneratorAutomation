@@ -8,7 +8,7 @@ from lib.videoLib.effects.zoomEffect import make_zoom_clip
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 import globalVariables as gv
 
-def combineImages(image_paths, output_path, audio_duration,
+def combineImages(image_paths, output_path, audio_duration, imageDurationEachImage=None,
                         imageDuration=None,
                         slidDurationInImage=None, additionalImagePath=None,
                         transitionDuration=None, fps=None, videoCode=None, videoPreset=None, finalVideoSize=None, imageCombineMethod=None, videoThreds=None, zoomStrength=None):
@@ -36,6 +36,11 @@ def combineImages(image_paths, output_path, audio_duration,
     clips = []
     
     for p in image_paths:
+        if imageDurationEachImage:
+            part = (os.path.splitext(os.path.basename(p))[0]).split('_')
+            keyNumber = int(part[2]) if len(part) >= 3 else 0
+            imageDuration = imageDurationEachImage[keyNumber] if keyNumber != 0 else imageDuration
+
         clips.append(make_zoom_clip(p, imageDuration, fps,
                                     transitionDuration, zoomStrength))
         if finalVideoSize:

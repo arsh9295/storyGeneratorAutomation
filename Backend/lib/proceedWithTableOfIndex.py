@@ -13,6 +13,7 @@ from lib.utilLib.readFiles import readPromptFile
 from lib.utilLib.writeToDoc import writeContentToDoc
 from lib.audioLib.audioGenerator import audioGenerator
 from lib.imageLib.imageGenerator import GenerateImage
+from lib.processImageFromSRT import processSRTFromImage
 
 def generateStoryForChapter(outputFinalPath, generatedIndex):
     for key, value in generatedIndex.items():
@@ -25,7 +26,8 @@ def generateStoryForChapter(outputFinalPath, generatedIndex):
                     audioOutputPath = f"{outputFinalPath}/Audio/"
                     chapetrName = f"chapter_{key}"
                     audioDuration = processAudio(generatedStory, audioOutputPath, chapetrName, key)
-                    if audioDuration:
+                    generatefromsrt = (getattr(gv, 'createImageFromSRT') and (gv.createImageFromSRT)) and (gv.addSubtitle)
+                    if audioDuration and not(generatefromsrt):
                         processingImage(audioDuration, outputFinalPath, key, generatedStory)
 
 def processChapterGenerateStory(storyOutputFile, storyPromptFile=gv.storyPromptFile, **kwargs):
@@ -113,11 +115,12 @@ def processingImage(audioDuration, outputFinalPath, key, generatedStory, perImag
     promptInstruction = f"Generate exact {imageNumber} image prompts, in sdxl format, for the below story. Image prompts must follow the sequence of story and it must follow story flow of this story: '{generatedStory}'. Please do not write any description or heading or 'Image Prompt' or number in output. I want only prompt seprated by new lines. Write prompt in english language only. {backgroundTheme}"
     
     # Generate image prompt
-    imagePromptFile = gv.imagePromptFile
+    if (getattr(gv, 'imagePromptFile') and (gv.imagePromptFile != "" or gv.imagePromptFile != None)):
+        imagePromptFile = gv.imagePromptFile
 
-    if imagePromptFile is not None or (os.path.exists(imagePromptFile) and os.path.getsize(imagePromptFile) != 0):
-        imagePromptContentfile = readPromptFile(imagePromptFile)
-        imagePromptContent = f"{promptInstruction}\n{imagePromptContentfile}"
+        if (os.path.exists(imagePromptFile) and os.path.getsize(imagePromptFile) != 0):
+            imagePromptContentfile = readPromptFile(imagePromptFile)
+            imagePromptContent = f"{promptInstruction}\n{imagePromptContentfile}"
     else:
         imagePromptContent = f"{promptInstruction}"
 
@@ -164,11 +167,16 @@ def processStoryName(generateIndex, storyNameFile=gv.storyNameFile):
         file.write(story_name + "\n")
     return story_name, story_name_folder
 
-def generateDescription(generatedIndex, descriptionOutputFile, descriptionPromptFile=gv.descriptionPromptFile, chatBotKey=gv.chatBotKey, chatBotModel=gv.chatBotModel):
+def generateDescription(generatedIndex, descriptionOutputFile, descriptionPromptFile=None, chatBotKey=gv.chatBotKey, chatBotModel=gv.chatBotModel):
     # Generate description for the story
-    descriptionPromptFile = descriptionPromptFile
-    descriptionPromptContent = readPromptFile(descriptionPromptFile)
-    formattedDescriptionContent = eval(f"f'''{descriptionPromptContent}'''")
+    promptInstruction = f"Generate a brief detailed description for the following story: \n {generatedIndex}"
+    if (getattr(gv, 'descriptionPromptFile') and (gv.descriptionPromptFile != "" or gv.descriptionPromptFile != None)):
+        descriptionPromptFile = gv.descriptionPromptFile
+    if (os.path.exists(descriptionPromptFile) and os.path.getsize(descriptionPromptFile) != 0):
+        descriptionPromptContent = readPromptFile(descriptionPromptFile)
+        formattedDescriptionContent = f"{promptInstruction}/n{descriptionPromptContent}"
+    else:
+        formattedDescriptionContent = f"{promptInstruction}"
     storyDescription = chatBotOutput(chatBotKey, chatBotModel, prompt=formattedDescriptionContent, useWeb=False)
     storyTitle = chatBotOutput(chatBotKey, chatBotModel, prompt=f"generate a summy for below as question mask, summy whould be under 100 characters in {gv.storyLanguage} language \n {storyDescription}", useWeb=False)
     if storyDescription:
@@ -179,9 +187,9 @@ def generateIndexFunction(storyLanguage=gv.storyLanguage, storyGenra=gv.storyGen
     storyNameExists = readPromptFile(storyNameFile).replace('\n', '').split(',')
 
     if storyLanguage.lower() == 'hindi':
-        promptInstruction = f"यह कहानी {storyLanguage} में है और शैली {storyGenra} है। परिणाम को एक dictionary के रूप में लौटाएँ जहाँ keys अध्याय संख्याएँ (पूर्णांक के रूप में string) हैं, और मान 'title' और 'description' कुंजियों वाले dictionary हैं। आउटपुट को JSON जैसी संरचना के रूप में ठीक से स्वरूपित किया जाना चाहिए। dictionary के पहले तत्व के रूप में उपन्यास का नाम भी बनाएँ जिसमें key 'novel_name' और मान उपन्यास के नाम के रूप में हो। उपन्यास का नाम {storyNameExists} में से कोई भी नहीं होना चाहिए \n कहानी के नाम में कोई विशेष वर्ण न डालें \n JSON सामग्री के अलावा कुछ भी अतिरिक्त न लिखें\n JSON संरचना की दोबारा जांच करें और सुनिश्चित करें कि यह वैध है, और दोबारा जांच लें कि आपने सभी निर्देशों का पालन किया है या नहीं"
+        promptInstruction = f"यह कहानी {storyLanguage} में है और शैली {storyGenra} है। परिणाम को एक dictionary के रूप में लौटाएँ जहाँ keys अध्याय संख्याएँ (पूर्णांक के रूप में string) हैं, और मान 'title' और 'description' कुंजियों वाले dictionary हैं। आउटपुट को JSON जैसी संरचना के रूप में ठीक से स्वरूपित किया जाना चाहिए। dictionary के पहले तत्व के रूप में उपन्यास का नाम भी बनाएँ जिसमें key 'novel_name' और मान उपन्यास के नाम के रूप में हो। उपन्यास के नाम में कोई विशेष वर्ण नहीं होना चाहिए। उपन्यास का नाम {storyNameExists} में से कोई भी नहीं होना चाहिए \n कहानी के नाम में कोई विशेष वर्ण न डालें \n JSON सामग्री के अलावा कुछ भी अतिरिक्त न लिखें\n JSON संरचना की दोबारा जांच करें और सुनिश्चित करें कि यह वैध है, और दोबारा जांच लें कि आपने सभी निर्देशों का पालन किया है या नहीं"
     elif storyLanguage.lower() == 'english':
-        promptInstruction = f"This story is in {storyLanguage} and genra is {storyGenra}. \n Return the result as a dictionary where keys are chapter numbers (as integers as string), and values are dictionaries with 'title' and 'description' keys. The output should be properly formatted as a JSON-like structure. Also, create the novel name as the first element of the dictionary with key 'novel_name' and value as the name of the novel. The novel name should not be any of {storyNameExists}. \n Do not put any special characters in the story name. \n Do not write anything extra except JSON content \n double check the JSON structure and ensure it is valid, and double check if you follow all instructions"
+        promptInstruction = f"This story is in {storyLanguage} and genra is {storyGenra}. \n Return the result as a dictionary where keys are chapter numbers (as integers as string), and values are dictionaries with 'title' and 'description' keys. The output should be properly formatted as a JSON-like structure. Also, create the novel name as the first element of the dictionary with key 'novel_name' and value as the name of the novel. The novel name should not have any spacial character. The novel name should not be any of {storyNameExists}. \n Do not put any special characters in the story name. \n Do not write anything extra except JSON content \n double check the JSON structure and ensure it is valid, and double check if you follow all instructions"
 
     tableOfIndexPrompt = f"{readPromptFile(tableOfIndexPromptFile)}\n{promptInstruction}"
 
