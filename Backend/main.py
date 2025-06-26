@@ -1,185 +1,106 @@
+import os
 import json
-import re
-from pydub import AudioSegment
-import math
+import logging
 
-from storyGenerator import geminiStoryGenerator
-from audioGenerator import generateVoice
-from imageGenerator import GenerateImage
-from combineImages import createCombineImages
-from combineAudio import combineAudioFiles
-from createVideo import createVideoMviepy
-from writeToDoc import writeContentToDoc
-from generateSRT import generateSRTFromAudio
-from addSubtitle import burn_subtitles_ffmpeg
+import globalVariables as gv
+from lib.generateVideoWithImage import generateVideoWithImages
+from lib.processVideoSubtitle import videoSubtitle
+from lib.generateThumbnil import createThumbnil
+from lib.audioLib.combineAudio import combineAudioFiles
+from lib.subtitleLib.generateSubtitle import generateASSWithKaraoke
+from lib.subtitleLib.convertAssToSrt import convertAssToSrtManual
+from lib.processImageFromSRT import processSRTFromImage
+from lib.videoLib.youtubeUpload import initializeUpload
+from datetime import datetime
 
-import argparse
+# Configure the logger
+logging.basicConfig(
+    level=logging.INFO,  # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+    format='%(asctime)s - %(levelname)s - %(message)s',  # Log format
+    handlers=[
+        #logging.FileHandler("app.log"),    # Log to a file
+        logging.StreamHandler()            # Log to console
+    ]
+)
 
-# Default values
-# geminiKey = ''
-# outputPath = 'E:/Youtube/Stories'
+videoGenerationMode = gv.videoGenerationMode if getattr(gv, 'videoGenerationMode', None) else "FromTableOfIndex"
 
-# Parse command line arguments
-parser = argparse.ArgumentParser(description='Story Generator')
-parser.add_argument('--api-key', help='API Key for Gemini')
-parser.add_argument('--output-path', help='Output path for generated files')
-parser.add_argument('--language', help='Story language')
-parser.add_argument('--type', help='Story type')
-parser.add_argument('--duration', help='Story duration')
-parser.add_argument('--model', help='AI model')
-parser.add_argument('--description', help='Story description')
-parser.add_argument('--prompt', help='Story prompt')
+start_time = datetime.now()
 
-args = parser.parse_args()
+if videoGenerationMode == "FromTableOfIndex":
+    tableOfIndexPromptFile= gv.tableOfIndexPromptFile
+    if tableOfIndexPromptFile is not None or (os.path.exists(tableOfIndexPromptFile) and os.path.getsize(tableOfIndexPromptFile) != 0):
+        logging.info("Found Process with Table of Index..Moving ahead")
+        from lib.proceedWithTableOfIndex import proceedWithTableOfIndex
+        storyName, storyTitle, finalPath = proceedWithTableOfIndex()
+    else:
+        raise ValueError(f"Provided table of index prompt file '{tableOfIndexPromptFile}' is not valid or does not exist.")
+elif videoGenerationMode == "FromStoryGeneratedFile":
+    storyFilePath= gv.storyFilePath
+    if storyFilePath is not None or (os.path.exists(storyFilePath) and os.path.getsize(storyFilePath) != 0):
+        logging.info("Found Process with Story File..Moving ahead")
+        from lib.proceedWithStoryFile import proceedWithStoryFile
+        storyName, storyTitle, finalPath = proceedWithStoryFile()
+    else:
+        raise ValueError(f"Provided table of index prompt file '{storyFilePath}' is not valid or does not exist.")
+elif videoGenerationMode == "FromStoryPrompt":
+    storyPromptFile= gv.storyPromptFile
+    if storyPromptFile is not None or (os.path.exists(storyPromptFile) and os.path.getsize(storyPromptFile) != 0):
+        logging.info("Found Process with story prompt file..Moving ahead")
+        from lib.proceedWithStoryPrompt import proceedWithStoryPrompt
+        storyName, storyTitle, finalPath = proceedWithStoryPrompt()
+    else:
+        raise ValueError(f"Provided table of index prompt file '{storyPromptFile}' is not valid or does not exist.")
+else:
+    raise ValueError("Invalid Video Generation Mode: expected a value from FromStoryGeneratedFile, FromStoryPrompt, FromTableOfIndex")
 
-print("Command line arguments:", args)
+# storyName = "Name is: TheAetheriumEcho"
+# storyTitle = "Grief-stricken Elara steals a Lens, facing spirits and the Shade King. A dark pact leads to a choice: protect the Veil or succumb to darkness."
+# finalPath = "E:/Youtube/Stories/test/english/supernatural/TheAetheriumEcho/"
 
-# Override defaults with command line arguments if provided
-if args.api_key:
-    geminiKey = args.api_key
-if args.output_path:
-    outputPath = args.output_path
+logging.info(f"Story Name is: {storyName}")
+logging.info(f"Story Title is: {storyTitle}")
+logging.info(f"Story Path is: {finalPath}")
 
-storyType = args.type if args.type else 'short'
-language = args.language if args.language else 'English'
-aiModel = args.model if args.model else 'gemini-2.0-flash'
-description = args.description if args.description else ''
-prompt = args.prompt if args.prompt else ''
+# Combine Audio
+createCombineAudio = combineAudioFiles(f"{finalPath}/Audio/", f"{finalPath}/Audio/combined/combined_audio.mp3")
 
-def readPromptFile(filePath):
-    with open(filePath, 'r', encoding="utf-8") as file:
-        content = file.read()
-    return content
+if gv.addSubtitle:
+    logging.info(f"Generating and adding subtitle")
+    storyName = storyName.strip()
+    subTitleFileName = storyName.replace(" ","_")
+    # Generate SRT
+    genneeratesrtout = generateASSWithKaraoke(f"{finalPath}/Audio/combined/combined_audio.mp3", f"{subTitleFileName}_subtitles.ass")
+    print(f"Hello: {genneeratesrtout}")
 
-def generateTableOfContents(apiKey, language, storyType, model):
-    tableIndexPromptFilePath = "../Input/Prompts/short/tableOfIndex.txt"
-    promptContent = readPromptFile(tableIndexPromptFilePath)
+print(f"Hello world ! {genneeratesrtout}")
 
-    chapterDescriptionPromptFile = "../Input/Prompts/short/chapterDescription.txt"
-    chapterDescriptionContent = readPromptFile(chapterDescriptionPromptFile)
+imageDuration = None
 
-    storyNameFile = "../Input/storyName.txt"
-    storyNameExists = readPromptFile(storyNameFile)
+if (gv.addSubtitle) and (gv.createImageFromSRT):
+    # Generate Image if from SRT
+    convertAssToSrtManual(f"{subTitleFileName}_subtitles.ass", f"{subTitleFileName}_subtitles.srt")
+    imageDuration = processSRTFromImage(f"{subTitleFileName}_subtitles.srt", f"{finalPath}", "1")
 
-    formatted_content = eval(f"f'''{promptContent}\n{chapterDescriptionContent}'''")
+# Generate Video
+generateVideoWithImages(finalPath, imageDuration)
 
-    tableOfContents = geminiStoryGenerator(
-        apiKey  = apiKey,
-        prompt  = formatted_content,
-        geminiModel  = model
-    )
-    return(tableOfContents)
+# Generate Subtitle
+if gv.addSubtitle:
+    logging.info(f"Generating and adding subtitle")
+    subTitleFileName = storyName.replace(" ","_")
+    videoSubtitle(f"{finalPath}/Audio/combined/combined_audio.mp3", f"{subTitleFileName}_subtitles.ass", f"{finalPath}/Videos/final_video.mp4", f"{finalPath}/Videos/final_video_with_subtitles.mp4")
 
-def generateStory(storyPrompt, apiKey, model):
-    storyOutput = geminiStoryGenerator(
-        apiKey  = apiKey,
-        prompt  = storyPrompt,
-        geminiModel  = model
-    )
-    return(storyOutput)
+# Generate Thumbnil
+if gv.generateThumbnil:
+    logging.info(f"Generating Thumbnil")
+    generateThumbnail = createThumbnil( prompt=f"{storyTitle}", imageFileName = "thumbnail", finalImageFileName = "final_thumbnail.png", image_path=f"{finalPath}/Images/", title_text=f"{storyTitle}")
 
-def generateImagePrompt():
-    imagePrompt = geminiStoryGenerator(
-        apiKey  = geminiKey,
-        prompt  = 'Write a story about Gemini',
-        geminiModel  = 'gemini-2.0-flash-thinking-exp'
-    )
-    return(imagePrompt)
+if getattr(gv, 'uploadToYoutube') and gv.uploadToYoutube == True:
+    initializeUpload()
+# Record end time
+end_time = datetime.now()
 
-def getImageList(folderPath):
-    import os
-    imageList = [os.path.join(folderPath, file)
-                 for file in os.listdir(folderPath)
-                 if file.lower().endswith('.png')]
-    return imageList
-
-tableOfIndex = generateTableOfContents(geminiKey, language, storyType, aiModel)
-
-if tableOfIndex:
-    json_string = tableOfIndex.replace("```json", "").replace("```", "").strip()
-
-    try:
-        chapter_dict = json.loads(json_string)                
-    except json.JSONDecodeError as e:
-        print(f"Error parsing JSON: {e}")
-
-    generate_index = chapter_dict
-
-    story_name = generate_index.get('novel_name', 'Untitled Novel')
-    print(f"Story name: {story_name}")
-
-    finalPath = f"{outputPath}/{language}/{storyType}/{story_name}/"
-
-    writeContentToDoc(f"{finalPath}/Docs/story.docx", story_name)
-    # writeContentToDoc(f"{finalPath}/Docs/story.docx", generate_index)
-
-    # Generate description for the story
-    descriptionPromptFile = "../Input/Prompts/short/descriptionPrompt.txt"
-    descriptionPromptContent = readPromptFile(descriptionPromptFile)
-    formattedDescriptionContent = eval(f"f'''{descriptionPromptContent}'''")
-    storyDescription = generateStory(formattedDescriptionContent, geminiKey, aiModel)
-    if storyDescription:
-        writeContentToDoc(f"{finalPath}/Docs/storyDescription.docx", storyDescription)
-
-    with open('../Input/storyName.txt', "a") as file:
-        file.write(story_name + "\n") 
-
-    generatedTitleVoice = generateVoice(story_name, f"{finalPath}/Audio/", f"chapter_0")
-    titleImageGen = GenerateImage(f"Write quoted text on image '{story_name}'", f"{finalPath}/Images/", f"chapter_0_0")
-
-    # finalPath = f"{outputPath}/{story_name}/{language}/{storyType}/"
-
-    # imageList = []
-    if generate_index:
-        storyPromptContent = ""
-        # Process each chapter
-        for key, value in generate_index.items():
-            if key != 'novel_name':  # Skip the novel name entry
-                if isinstance(value, dict) and 'title' in value:
-                    storyPromptFile = "../Input/Prompts/short/storyPrompt.txt"
-                    storyPromptContent = readPromptFile(storyPromptFile)
-                    formattedContent = eval(f"f'''{storyPromptContent}'''")
-                    storyPrompt = formattedContent
-                    print(f"Generating story for chapter {key}...")
-                    generatedStory = generateStory(storyPrompt, geminiKey, aiModel)
-                    if generatedStory:
-                        # Generate voice for the story
-                        writeContentToDoc(f"{finalPath}/Docs/story.docx", generatedStory)
-
-                        generatedVoice = generateVoice(generatedStory, f"{finalPath}/Audio/", f"chapter_{key}")
-
-                        audio = AudioSegment.from_file(generatedVoice)  # or .wav, .ogg, etc.
-                        duration_seconds = len(audio) / 1000  # pydub returns length in milliseconds
-                        print(f"Duration: {duration_seconds} seconds for chapter {key}")
-
-                        # Dynamically calculate image duration
-                        imageNumber = math.ceil(duration_seconds / 5)  # Assuming 5 seconds per image
-                        image_duration = duration_seconds / imageNumber
-                        print(f"Number of images to generate: {imageNumber} for chapter {key}")
-                        print(f"Calculated image duration: {image_duration} seconds")
-
-                        # Generate image prompt
-                        imagePromptFile = "../Input/Prompts/short/ImagePromtp.txt"
-                        imagePromptContent = readPromptFile(imagePromptFile)
-                        formattedImagePromptContent = eval(f"f'''{imagePromptContent}'''")
-                        imagePrompts = generateStory(formattedImagePromptContent, geminiKey, aiModel)
-                        writeContentToDoc(f"{finalPath}/Docs/prompts.docx", imagePrompts)
-                        if imagePrompts:
-                            for number, line in enumerate(imagePrompts.split('\n')):
-                                if line.strip():
-                                    # Generate image from the prompt
-                                    imageGen = GenerateImage(line.strip(), f"{finalPath}/Images/", f"chapter_{key}_{number}")
-
-    # Generate video from images
-    imageList = getImageList(f"{finalPath}/Images/")
-    createCombineImages(imageList, f"{finalPath}/Videos/chapter_video.mp4", image_duration=image_duration, transition_duration=1)
-    combineAudioFiles(f"{finalPath}/Audio/", f"{finalPath}/Audio/combined/combined_audio.mp3")
-    createVideoMviepy(f"{finalPath}/Videos/chapter_video.mp4", f"{finalPath}/Audio/combined/combined_audio.mp3", f"{finalPath}/Videos/final_video.mp4")
-    generateSRTFromAudio(f"{finalPath}/Audio/combined/combined_audio.mp3", "subtitles.srt")
-    # generateSRTFromAudio(f"{finalPath}/Audio/combined/combined_audio.mp3", f"{finalPath}/Videos/subtitles.srt")
-    burn_subtitles_ffmpeg(
-        f"{finalPath}/Videos/final_video.mp4",
-        f"subtitles.srt",
-        # f"{finalPath}/Videos/subtitles.srt",
-        f"{finalPath}/Videos/final_video_with_subtitles.mp4"
-    )
+# Calculate and print duration
+duration = end_time - start_time
+logging.info(f"Total duration In Video Generation: {duration}")
