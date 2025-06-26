@@ -71,7 +71,8 @@ def resumable_upload(request):
         print(f"{error}. Sleeping {sleep:.2f} seconds and retrying...")
         time.sleep(sleep)
 
-def initializeUpload(youtube, file, title=None, description=None, category="24", privacyStatus="private", keywords=None):
+def initializeUpload(file, title=None, description=None, category="24", privacyStatus="private", keywords=None):
+    youtube = get_authenticated_service()
     tags = keywords.split(",") if keywords else None
 
     body = {
