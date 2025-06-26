@@ -41,11 +41,12 @@ def combineImages(image_paths, output_path, audio_duration, imageDurationEachIma
             keyNumber = int(part[2]) if len(part) >= 3 else 0
             imageDuration = imageDurationEachImage[keyNumber] if keyNumber != 0 else imageDuration
 
-        clips.append(make_zoom_clip(p, imageDuration, fps,
-                                    transitionDuration, zoomStrength))
+        # clips.append(make_zoom_clip(p, imageDuration, fps, transitionDuration, zoomStrength))
+        clip = make_zoom_clip(p, imageDuration, fps, transitionDuration, zoomStrength)
         if finalVideoSize:
             clip = clip.resized(new_size=finalVideoSize)
-            clips.append(clip)
+            # clips.append(clip)
+        clips.append(clip)
 
     if additionalImagePath:
         additional_clip = ImageClip(additionalImagePath).with_duration(imageDuration).with_position('center').with_effects([vfx.CrossFadeIn(transitionDuration)]).with_effects([vfx.CrossFadeOut(transitionDuration)])

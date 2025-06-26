@@ -1,5 +1,6 @@
 import os,sys
 import logging
+import shutil
 
 from datetime import datetime
 logger = logging.getLogger(__name__)
@@ -14,9 +15,21 @@ def parse_srt_time(t):
     return datetime.strptime(t, "%H:%M:%S,%f")
 
 def generateImagePrompt(text):
+    imagePrompt = f'''
+    Generate 1 highly detailed and vivid image prompts based on the story provided below. The prompts must follow the narrative sequence and capture key moments, emotions, and transitions in the story. Each prompt must visually describe a specific scene like a cinematic frame, with strong attention to atmosphere, lighting, and realism.
+    For every character mentioned in the story (e.g., "Leena"), describe their appearance (age, facial features, hairstyle, clothing, and expression) in the first prompt where they appear. In all following prompts, keep their visual appearance consistent without repeating their full description — just refer to them naturally (e.g., "Leena stands near the window"). The same rule applies to key objects, buildings, creatures, or locations (e.g., “a rusty wooden cabin” should be described once, and referenced consistently thereafter).
+    Avoid generic or symbolic descriptions — focus on realism and precise visual storytelling. Do not write any headings, descriptions, labels, or numbers. Only output 1 pure image prompts, one per line, in English.
+    Story: '{text}'
+    '''
     storyLanguage=gv.storyLanguage
-    backgroundTheme = "This story is from India so Keep Indian theme and indian things in each prompt" if storyLanguage.lower() == 'hindi' else ""
-    imagePrompt = f"image prompt in sdxl format, for the below text.\n{text}'. Please do not write any description or heading or 'Image Prompt' or number in output, I want only prompt. Write prompt in english language only. {backgroundTheme}"
+    if storyLanguage.lower() == 'hindi':
+        imagePrompt = f'''
+        Generate exactly 1 highly detailed and vivid image prompts based on the story provided below. The prompts must follow the narrative sequence and capture key moments, emotions, and transitions in the story. Each prompt must visually describe a specific scene like a cinematic frame, with strong attention to atmosphere, lighting, and realism.
+        All characters, locations, outfits, objects, and environments must reflect Indian cultural, social, and geographical context. This includes traditional Indian clothing (like sarees, kurtas, or school uniforms), Indian facial features, rural or urban Indian architecture, natural Indian landscapes, and authentic accessories or vehicles (such as auto-rickshaws, scooters, Indian temples, or banyan trees). 
+        For every character mentioned in the story (e.g., "Leena"), describe their appearance (age, facial features, hairstyle, traditional attire, and expression) in the first prompt where they appear. In all following prompts, keep their visual appearance consistent without repeating the full description — just refer to them naturally (e.g., "Leena runs through the dusty street"). Do the same for recurring settings or objects — describe them in detail once, then reference them consistently.
+        Avoid generic or symbolic visuals. Focus on cinematic realism and culturally grounded visual storytelling. Do not write any headings, descriptions, labels, or numbers. Only output 1 pure image prompts, one per line, in English.
+        Story: '{text}'
+        '''
     return imagePrompt
 
 def processSRTFromImage(srtFilePath, outputFinalPath, key):
@@ -47,6 +60,8 @@ def processSRTFromImage(srtFilePath, outputFinalPath, key):
             if imagePrompt:
                 GenerateImage(imagePrompt, f"{outputFinalPath}/Images/", f"chapter_{key}_{number}")
 
+    destination_path = os.path.dirname(f"{outputFinalPath}")
+    shutil.move(srtFilePath, destination_path)
     return time_diff_dict
 
 # # Example usage

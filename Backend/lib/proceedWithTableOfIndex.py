@@ -108,12 +108,52 @@ def processingImage(audioDuration, outputFinalPath, key, generatedStory, perImag
     imageNumber = math.ceil(audioDuration / perImageDuration) 
     logging.info(f"Number of images to generate: {imageNumber} for chapter {key}")
 
+    promptInstruction = f'''
+        Generate exactly {imageNumber} highly detailed, cinematic image prompts based on the story below. Prompts must follow the story’s sequence, capturing key scenes, emotions, and visual transitions with realism and atmospheric consistency.
+
+        1. Character descriptions: 
+        - For each character (e.g., "Leena," "Rahul," "Officer Kumar"), in the first prompt they appear, include age, gender, facial shape, skin tone, distinct facial features (eyes, nose, jawline), hairstyle, clothing style, and current expression or posture.  
+        - In subsequent prompts, refer to them naturally (e.g., “Leena stands by the door,” “Rahul glances over his shoulder”) without re-listing their attributes.
+
+        2. Object/location introductions:
+        - Introduce each key object or setting (e.g., “a rusty wooden cabin with peeling blue paint,” “an old brass lantern”) in its first mention.  
+        - Later prompts may reference them by name (e.g., “the cabin,” “the lantern”) without repeating full descriptions.
+
+        3. Visual storytelling details:
+        - Use vivid details for lighting (golden hour, moonlit shadow), textures (cracked walls, mist), and mood (tense, hopeful, eerie).  
+        - Ensure each prompt reads like a film still—clear cinematic framing, atmosphere, and emotional tone.
+
+        4. Output format:
+        - Do not include titles, labels, numbering, or extra commentary—just {imageNumber} pure prompts, each on a new line, in English.
+
+        Story: '{generatedStory}'
+    '''
     storyLanguage=gv.storyLanguage
+    if storyLanguage.lower() == 'hindi':
+        promptInstruction = f'''
+        Generate exactly {imageNumber} highly detailed and vivid image prompts based on the story provided below. The prompts must follow the narrative sequence and capture key moments, emotions, and transitions in the story. Each prompt must visually describe a specific scene like a cinematic frame, with strong attention to atmosphere, lighting, and realism.
 
-    backgroundTheme = "This story is from India so Keep Indian theme and indian things in each prompt" if storyLanguage.lower() == 'hindi' else ""
+        All characters, locations, outfits, objects, and environments must reflect Indian cultural, social, and geographical context—such as traditional sarees, kurtas, school uniforms; Indian facial features; rural or urban architecture; natural landscapes; and authentic elements like auto‑rickshaws, scooters, banyan trees, temple motifs, or monsoon skies.
 
-    promptInstruction = f"Generate exact {imageNumber} image prompts, in sdxl format, for the below story. Image prompts must follow the sequence of story and it must follow story flow of this story: '{generatedStory}'. Please do not write any description or heading or 'Image Prompt' or number in output. I want only prompt seprated by new lines. Write prompt in english language only. {backgroundTheme}"
-    
+        1. Character introductions:  
+        - In the first prompt where each character appears (e.g., “Leena,” “Rahul,” “Inspector Meena”), include age, gender, skin tone, facial structure (eyes, nose, jaw), hairstyle, traditional attire, and expression or posture grounded in Indian style.  
+        - In subsequent prompts, refer to the character naturally (e.g., “Leena leans against the temple wall,” “Rahul glances anxiously under his cap”) without re-listing their attributes.
+
+        2. Setting and object consistency:  
+        - Introduce each key location or object once with vivid Indian-specific detail (e.g., “a weathered red sandstone courtyard,” “a green auto-rickshaw parked under a neem tree,” “a brass oil lamp flickering in the veranda”).  
+        - Later prompts may simply reference these as “the courtyard,” “the rickshaw,” “the lamp,” keeping their visual identity consistent.
+
+        3. Cinematic realism:
+        - Use culturally appropriate lighting and atmosphere—e.g., warm sunrise over fields, monsoon rain washing village lanes, dusk streetlights in Mumbai, temple incense smoke.  
+        - Highlight textures: peeling plaster, woven textiles, muddy paths, sun-bleached walls.
+
+        4. Formatting rules: 
+        - Output exactly {imageNumber} pure prompts, each on a new line, in English.  
+        - Do not include titles, numbers, labels, or extra commentary—just the scene descriptions.
+
+        Story: '{generatedStory}'
+        '''
+
     # Generate image prompt
     if (getattr(gv, 'imagePromptFile') and (gv.imagePromptFile != "" or gv.imagePromptFile != None)):
         imagePromptFile = gv.imagePromptFile
@@ -157,6 +197,9 @@ def processStoryName(generateIndex, storyNameFile=gv.storyNameFile):
     story_name = generateIndex.get('novel_name', 'Untitled Novel')
     logging.info(f"Story name: {story_name}")
 
+    if gv.storyLanguage.lower() == 'english':
+        story_name = re.sub(r'[^A-Za-z0-9 ]', '', story_name)
+
     storyNameExists = readPromptFile(storyNameFile).replace('\n', '').split(',')
     if story_name in storyNameExists:
         story_name_folder = story_name + "_" + datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -178,7 +221,7 @@ def generateDescription(generatedIndex, descriptionOutputFile, descriptionPrompt
     else:
         formattedDescriptionContent = f"{promptInstruction}"
     storyDescription = chatBotOutput(chatBotKey, chatBotModel, prompt=formattedDescriptionContent, useWeb=False)
-    storyTitle = chatBotOutput(chatBotKey, chatBotModel, prompt=f"generate a summy for below as question mask, summy whould be under 100 characters in {gv.storyLanguage} language \n {storyDescription}", useWeb=False)
+    storyTitle = chatBotOutput(chatBotKey, chatBotModel, prompt=f"Generate a single, engaging summary for the story below in the form of a suspenseful or thought-provoking question. The question must be under 100 characters and should hint at the core conflict or mystery of the story without giving away the ending. Use a tone that creates curiosity, such as 'What happens when...' or 'Can she escape...?' or 'Will they survive...?'. In {gv.storyLanguage} language \n {storyDescription}", useWeb=False)
     if storyDescription:
         writeContentToDoc(descriptionOutputFile, storyDescription) 
     return storyTitle   
@@ -210,6 +253,7 @@ def proceedWithTableOfIndex(storyLanguage=gv.storyLanguage, storyGenra=gv.storyG
         story_name, story_name_folder = processStoryName(generateIndex, storyNameFile)
 
         finalPath = f"{outputPath}/{storyLanguage}/{storyGenra}/{story_name_folder}/"
+        os.makedirs(finalPath, exist_ok=True)
         writeContentToDoc(f"{finalPath}/Docs/story.docx", story_name)
         
         if (os.path.exists(descriptionPromptFile) and os.path.getsize(descriptionPromptFile) != 0) or descriptionPromptFile is not None:

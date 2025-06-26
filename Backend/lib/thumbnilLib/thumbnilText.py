@@ -17,38 +17,58 @@ def draw_centered_text(
     y_offset=None,
     fill=None,
     outline_color=None,
-    outline_width=None
+    outline_width=None,
+    line_spacing=10  # spacing between lines
 ):
     v_align = v_align or "center"
     y_offset = y_offset if y_offset is not None else 0
     fill = fill or (255, 255, 255)
     outline_width = outline_width if outline_width is not None else 2
 
-    # Get text size
-    bbox = draw.textbbox((0, 0), text, font=font)
-    text_width = bbox[2] - bbox[0]
-    text_height = bbox[3] - bbox[1]
+    # Auto-wrap text
+    words = text.split()
+    lines = []
+    current_line = ""
 
-    # Horizontal center
-    x = (image_width - text_width) // 2
+    for word in words:
+        test_line = f"{current_line} {word}".strip()
+        bbox = draw.textbbox((0, 0), test_line, font=font)
+        w = bbox[2] - bbox[0]
+        if w <= image_width * 0.9:  # 90% of width for padding
+            current_line = test_line
+        else:
+            lines.append(current_line)
+            current_line = word
+    if current_line:
+        lines.append(current_line)
 
-    # Vertical alignment
+    # Calculate total height of all lines
+    line_height = font.getbbox("Ay")[3]  # reliable height calculation
+    total_text_height = len(lines) * (line_height + line_spacing) - line_spacing
+
+    # Determine starting Y based on vertical alignment
     if v_align == "top":
         y = 0 + y_offset
     elif v_align == "bottom":
-        y = image_height - text_height - y_offset
+        y = image_height - total_text_height - y_offset
     else:  # center
-        y = (image_height - text_height) // 2 + y_offset
+        y = (image_height - total_text_height) // 2 + y_offset
 
-    # Draw outline
-    if outline_color:
-        for dx in range(-outline_width, outline_width + 1):
-            for dy in range(-outline_width, outline_width + 1):
-                if dx != 0 or dy != 0:
-                    draw.text((x + dx, y + dy), text, font=font, fill=outline_color)
+    # Draw each line centered
+    for line in lines:
+        bbox = draw.textbbox((0, 0), line, font=font)
+        w = bbox[2] - bbox[0]
+        x = (image_width - w) // 2
 
-    # Draw main text
-    draw.text((x, y), text, font=font, fill=fill)
+        # Draw outline
+        if outline_color:
+            for dx in range(-outline_width, outline_width + 1):
+                for dy in range(-outline_width, outline_width + 1):
+                    if dx != 0 or dy != 0:
+                        draw.text((x + dx, y + dy), line, font=font, fill=outline_color)
+
+        draw.text((x, y), line, font=font, fill=fill)
+        y += line_height + line_spacing
 
 
 def createThumbnailWithText(

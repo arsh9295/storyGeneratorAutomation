@@ -70,7 +70,10 @@ if gv.addSubtitle:
     storyName = storyName.strip()
     subTitleFileName = storyName.replace(" ","_")
     # Generate SRT
-    generateASSWithKaraoke(f"{finalPath}/Audio/combined/combined_audio.mp3", f"{subTitleFileName}_subtitles.ass")
+    genneeratesrtout = generateASSWithKaraoke(f"{finalPath}/Audio/combined/combined_audio.mp3", f"{subTitleFileName}_subtitles.ass")
+    print(f"Hello: {genneeratesrtout}")
+
+print(f"Hello world ! {genneeratesrtout}")
 
 imageDuration = None
 

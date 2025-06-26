@@ -101,5 +101,7 @@ def generateASSWithKaraoke(
 
             f.write(f"Dialogue: 0,{start},{end},{style_name},,0,0,0,,{dialogue_line.strip()}\n")
 
-        print("Creating ass Completed...")
+    print("Creating ass Completed...")
+    return "Hello"
         
+    # sys.exit(0)

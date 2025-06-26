@@ -83,7 +83,7 @@ def burnSubtitleToVideo(
         subprocess.run(command, check=True)
 
     # Move SRT to respective directory
-    if os.path.exists(video_path):
-        os.remove(video_path)
+    # if os.path.exists(video_path):
+    #     os.remove(video_path)
     destination_path = os.path.dirname(video_path)
     shutil.move(subtitle_path, destination_path)

@@ -1,5 +1,5 @@
 import logging
-import os, sys
+import os, sys, re
 import math
 from datetime import datetime
 from pydub import AudioSegment
@@ -55,7 +55,9 @@ def generateStoryName(storyText):
         storyName = gv.storyName
     else:
         alreadyExistingName = readPromptFile(gv.storyNameFile).replace('\n', '').split(',')
-        storyName = chatBotOutput(gv.chatBotKey, gv.chatBotModel, prompt=f"Generate a catchy story name for below story in {gv.storyLanguage} language. Do not give multiple options or do not write unnessery text. only generate story name in mention language only not other language should be there. do not put astrik to make it bold. do not add new line \n {storyText} \n Name should not be any of {alreadyExistingName}")
+        storyName = chatBotOutput(gv.chatBotKey, gv.chatBotModel, prompt=f"Generate a catchy story name for below story in {gv.storyLanguage} language. Do not give multiple options or do not write unnessery text. only generate story name in mention language only not other language should be there. do not put astrik to make it bold. do not add new line, do not add any spaical character in name like ', :, etc \n {storyText} \n Name should not be any of {alreadyExistingName}")
+
+        storyName = re.sub(r'[^A-Za-z0-9 ]', '', storyName)
 
         if storyName in gv.storyNameFile:
             story_name_folder = storyName + "_" + datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -65,21 +67,25 @@ def generateStoryName(storyText):
         with open(gv.storyNameFile, "a", encoding='utf-8') as file:
             file.write(storyName + "\n")    
 
-    storyTitle = chatBotOutput(gv.chatBotKey, gv.chatBotModel,  prompt=f"generate a summy for below as question mask, summy whould be under 100 characters in {gv.storyLanguage} language. Do not give multiple options or do not write unnessery text. only generate story name in mention language only not other language should be there. do not put astrik to make it bold. do not add new line \n {storyText}")
+    storyTitle = chatBotOutput(gv.chatBotKey, gv.chatBotModel,  prompt=f"Generate a single, engaging summary for the story below in the form of a suspenseful or thought-provoking question. The question must be under 100 characters and should hint at the core conflict or mystery of the story without giving away the ending. Use a tone that creates curiosity, such as 'What happens when...' or 'Can she escape...?' or 'Will they survive...?'. In {gv.storyLanguage} language. Do not give multiple options or do not write unnessery text. only generate story name in mention language only not other language should be there. do not put astrik to make it bold. do not add new line \n {storyText}")
     return storyName.strip(), storyTitle.strip(), story_name_folder.strip()
 
 
 def proceedWithStoryPrompt():
     prompt = gv.storyPrompt if(getattr(gv, 'storyName') and gv.storyPrompt != "" or gv.storyPrompt != None) else None
     PromptFiles = gv.storyPromptFile if (os.path.exists(gv.storyPromptFile) and os.path.getsize(gv.storyPromptFile) != 0) or gv.storyPromptFile is not None else None
-    if not prompt or not PromptFiles:
+    
+    if prompt == None and PromptFiles == None:
         raise ValueError("storyPromptFile or storyPrompt Required !")
 
-    storyText = chatBotOutput(gv.chatBotKey, gv.chatBotModel, PromptFiles=None, prompt=None,)
+    print(f"Prompt file is {PromptFiles}")
+    print(f"Prompt is {prompt}")
+
+    storyText = chatBotOutput(gv.chatBotKey, gv.chatBotModel, [PromptFiles], prompt)
     if storyText:
         storyName, storyTitle, story_name_folder = generateStoryName(storyText)
         finalOutputPath = f"{gv.outputPath}/{story_name_folder}"
-        generatedAudioDuration = processAudio(storyText, finalOutputPath, storyName)
+        generatedAudioDuration = processAudio(storyText, finalOutputPath, storyName, 1)
         generatefromsrt = (getattr(gv, 'createImageFromSRT') and (gv.createImageFromSRT)) and (gv.addSubtitle)
         if not(generatefromsrt):
             processingImage(generatedAudioDuration, finalOutputPath, "1", storyText)
