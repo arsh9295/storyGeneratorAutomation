@@ -12,6 +12,7 @@ from lib.subtitleLib.convertAssToSrt import convertAssToSrtManual
 from lib.processImageFromSRT import processSRTFromImage
 from lib.videoLib.youtubeUpload import initializeUpload
 from datetime import datetime
+from lib.utilLib.writeToDoc import writeContentToDoc
 
 # Configure the logger
 logging.basicConfig(
@@ -57,6 +58,8 @@ else:
 # storyName = "Name is: TheAetheriumEcho"
 # storyTitle = "Grief-stricken Elara steals a Lens, facing spirits and the Shade King. A dark pact leads to a choice: protect the Veil or succumb to darkness."
 # finalPath = "E:/Youtube/Stories/test/english/supernatural/TheAetheriumEcho/"
+
+writeContentToDoc(f"{finalPath}/Docs/title.docx", storyTitle)
 
 logging.info(f"Story Name is: {storyName}")
 logging.info(f"Story Title is: {storyTitle}")
