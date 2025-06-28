@@ -13,6 +13,7 @@ from lib.processImageFromSRT import processSRTFromImage
 from lib.videoLib.youtubeUpload import initializeUpload
 from datetime import datetime
 from lib.utilLib.writeToDoc import writeContentToDoc
+from lib.utilLib.readDocFile import readDocx
 
 # Configure the logger
 logging.basicConfig(
@@ -100,7 +101,9 @@ if gv.generateThumbnil:
     generateThumbnail = createThumbnil( prompt=f"{storyTitle}", imageFileName = "thumbnail", finalImageFileName = "final_thumbnail.png", image_path=f"{finalPath}/Images/", title_text=f"{storyTitle}")
 
 if getattr(gv, 'uploadToYoutube') and gv.uploadToYoutube == True:
-    videoDescription = ""
+    videoDescription = None
+    if os.path.exists(f"{finalPath}/Docs/storyDescription.docx"):
+        videoDescription = readDocx(f"{finalPath}/Docs/storyDescription.docx")
     thumbnilFile = None
     if gv.generateThumbnil:
         thumbnilFile = f"{finalPath}/Images/final_thumbnail.png"
