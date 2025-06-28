@@ -38,7 +38,8 @@ def get_authenticated_service():
         credentials = run_flow(flow, storage)
     return build(YOUTUBE_API_SERVICE, YOUTUBE_API_VERSION, credentials=credentials)
 
-def set_thumbnail(youtube, video_id, thumbnail_path):
+def set_thumbnail(video_id, thumbnail_path):
+    youtube = get_authenticated_service()
     request = youtube.thumbnails().set(
         videoId=video_id,
         media_body=MediaFileUpload(thumbnail_path)
@@ -71,7 +72,7 @@ def resumable_upload(request):
         print(f"{error}. Sleeping {sleep:.2f} seconds and retrying...")
         time.sleep(sleep)
 
-def initializeUpload(file, title=None, description=None, category="24", privacyStatus="private", keywords=None):
+def initializeUpload(file, title=None, description=None, category="24", privacyStatus="private", keywords=None, thumbnilFile=None):
     youtube = get_authenticated_service()
     tags = keywords.split(",") if keywords else None
 
@@ -93,6 +94,8 @@ def initializeUpload(file, title=None, description=None, category="24", privacyS
     )
     video_id = resumable_upload(insert_request)
     print(f"Video uploaded! ID: {video_id}")
+    if thumbnilFile:
+        set_thumbnail(video_id, thumbnilFile)
 
 # if __name__ == "__main__":
 #     argparser.add_argument("--file", required=True, help="Video file path")

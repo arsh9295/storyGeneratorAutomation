@@ -100,7 +100,11 @@ if gv.generateThumbnil:
     generateThumbnail = createThumbnil( prompt=f"{storyTitle}", imageFileName = "thumbnail", finalImageFileName = "final_thumbnail.png", image_path=f"{finalPath}/Images/", title_text=f"{storyTitle}")
 
 if getattr(gv, 'uploadToYoutube') and gv.uploadToYoutube == True:
-    initializeUpload(f"{finalPath}/Videos/final_video_with_subtitles.mp4", storyTitle)
+    videoDescription = ""
+    thumbnilFile = None
+    if gv.generateThumbnil:
+        thumbnilFile = f"{finalPath}/Images/final_thumbnail.png"
+    initializeUpload(f"{finalPath}/Videos/final_video_with_subtitles.mp4", storyTitle, videoDescription, thumbnilFile)
 # Record end time
 end_time = datetime.now()
 
