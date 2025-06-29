@@ -107,7 +107,7 @@ if getattr(gv, 'uploadToYoutube') and gv.uploadToYoutube == True:
     thumbnilFile = None
     if gv.generateThumbnil:
         thumbnilFile = f"{finalPath}/Images/final_thumbnail.png"
-    initializeUpload(f"{finalPath}/Videos/final_video_with_subtitles.mp4", storyTitle, videoDescription, thumbnilFile)
+    initializeUpload(f"{finalPath}/Videos/final_video_with_subtitles.mp4", storyTitle, videoDescription, thumbnilFile=thumbnilFile)
 # Record end time
 end_time = datetime.now()
 
