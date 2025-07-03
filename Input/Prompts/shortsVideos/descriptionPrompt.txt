@@ -1,1 +1,0 @@
-Generate a brief detailed description for the following story: \n {generatedIndex}
