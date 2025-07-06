@@ -6,7 +6,7 @@ from pydub import AudioSegment
 
 logger = logging.getLogger(__name__)
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import globalVariables as gv
 
 from lib.utilLib.readDocFile import readDocx
@@ -85,6 +85,7 @@ def proceedWithStoryPrompt():
     if storyText:
         storyName, storyTitle, story_name_folder = generateStoryName(storyText)
         finalOutputPath = f"{gv.outputPath}/{story_name_folder}"
+        print(f"final Output Path: {finalOutputPath}")
         generatedAudioDuration = processAudio(storyText, finalOutputPath, storyName, 1)
         generatefromsrt = (getattr(gv, 'createImageFromSRT') and (gv.createImageFromSRT)) and (gv.addSubtitle)
         if not(generatefromsrt):

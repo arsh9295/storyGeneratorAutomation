@@ -5,7 +5,7 @@ import time
 import random
 import httplib2
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 import globalVariables as gv
 
 from googleapiclient.discovery import build
@@ -32,7 +32,7 @@ YOUTUBE_API_VERSION = "v3"
 
 def get_authenticated_service():
     flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=YOUTUBE_UPLOAD_SCOPE)
-    storage = Storage("yt_oauth2.json")
+    storage = Storage("/app/configs/yt_oauth2.json")
     credentials = storage.get()
     if credentials is None or credentials.invalid:
         credentials = run_flow(flow, storage)
@@ -95,7 +95,7 @@ def initializeUpload(file, title=None, description=None, category="24", privacyS
     video_id = resumable_upload(insert_request)
     print(f"Video uploaded! ID: {video_id}")
     if video_id:
-        with open('schedule.txt', 'w', encoding='utf-8') as file:
+        with open(gv.youtubeScheduleFile, 'w', encoding='utf-8') as file:
             file.write(scheduledTime)
     if thumbnilFile and video_id:
         set_thumbnail(video_id, thumbnilFile)

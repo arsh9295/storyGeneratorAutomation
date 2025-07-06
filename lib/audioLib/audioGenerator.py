@@ -1,7 +1,7 @@
 import sys
 import os
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 import globalVariables as gv
 
 def audioGenerator(inputText, outputpat, outputfileName, voiceName=None, 
@@ -69,6 +69,16 @@ def audioGenerator(inputText, outputpat, outputfileName, voiceName=None,
             filename=f"{outputfileName}.wav", 
             slow=slow, 
             tld=tld
+        )
+    elif audioModel.lower() == "kokorofastapi":
+        from lib.audioLib.kokorofastapi import synthesize
+        audio_file = synthesize(
+            inputText, 
+            voice=voiceName,
+            model=model_name,
+            speed=speed,
+            OutputPath=outputpat,
+            output_file_name=outputfileName,
         )
     else:
         raise ValueError(f"Unsupported audio model: {audioModel}")

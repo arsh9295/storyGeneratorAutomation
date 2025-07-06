@@ -1,27 +1,26 @@
 # Use official Python image as base
 # FROM python:3.10-slim
 # FROM nvidia/cuda:12.2.0-cudnn8-runtime-ubuntu22.04
-# FROM nvidia/cuda:12.2.2-cudnn8-runtime-ubuntu22.04
-FROM storygenerator
+FROM nvidia/cuda:12.2.2-cudnn8-runtime-ubuntu22.04
 
 
 # Set working directory
 WORKDIR /app
 
 # Install system dependencies
-# RUN apt-get update && \
-#     apt-get install -y python3-pip python3-venv ffmpeg git && \
-#     rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y python3-pip python3-venv ffmpeg git && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy requirements.txt
-# COPY requirements.txt ./
+COPY requirements.txt ./
 
 # RUN python3 -m ensurepip --upgrade
 
 # RUN pip uninstall torch --index-url https://download.pytorch.org/whl/cu124
-# RUN pip3 install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu128
+RUN pip3 install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu128
 # Install Python dependencies
-# RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code
 COPY . .

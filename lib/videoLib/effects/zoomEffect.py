@@ -4,7 +4,7 @@ import numpy as np
 from moviepy import ImageClip, VideoClip, concatenate_videoclips
 from moviepy.video.fx import FadeIn, FadeOut
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 import globalVariables as gv
 
 def make_zoom_clip(path, duration, fps, trans_dur=1, zoom_strength=0.1, ZoomDirection=None):

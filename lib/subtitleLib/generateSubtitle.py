@@ -1,7 +1,7 @@
 import os, sys
 from faster_whisper import WhisperModel
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 import globalVariables as gv
 
 def format_ass_time(seconds):

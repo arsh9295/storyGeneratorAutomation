@@ -6,7 +6,7 @@ from PIL import Image
 
 logger = logging.getLogger(__name__)
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import globalVariables as gv
 
 def compress_image(input_path, output_path, quality=30):

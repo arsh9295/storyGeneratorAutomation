@@ -8,8 +8,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
+FOOOCUS_HOST = os.getenv("FOOOCUS_HOST", "story1-fooocus")
+FOOOCUS_PORT = int(os.getenv("FOOOCUS_PORT", "8888"))
+KOKORO_HOST = os.getenv("KOKORO_HOST", "story1-kokoro")
+KOKORO_PORT = int(os.getenv("KOKORO_PORT", "8880"))
+
 # Fooocus API URL
-API_URL = "http://127.0.0.1:8888/v1/generation/text-to-image"  # NOT /generate
+API_URL = f"http://{FOOOCUS_HOST}:{FOOOCUS_PORT}/v1/generation/text-to-image"  # NOT /generate
 
 def generateImageFromText(prompt, negative_prompt="", seed=-1, sampler="DPM++ 2M Karras", performance_selection="Speed", aspect_ratios_selection="1080*1920", guidance_scale= 7.5, model="juggernautXL_version6Rundiffusion.safetensors", imageExtension="png"):
 	# Simple working payload
@@ -29,7 +35,28 @@ def generateImageFromText(prompt, negative_prompt="", seed=-1, sampler="DPM++ 2M
 
 	# Send request
 	result = requests.post(API_URL, json=payload)
-	return result.json()
+	result.raise_for_status()            # always a good idea
+
+	data = result.json()
+	if not isinstance(data, list) or not data:
+		raise ValueError("Unexpected API response: empty or not list")
+
+	first = data[0]
+	img_url = first.get("url")
+	img_url = img_url.replace("127.0.0.1", FOOOCUS_HOST)
+	if not img_url:
+		raise ValueError("No 'url' field in API response")
+
+	# Download image from the URL
+	img_resp = requests.get(img_url)
+	img_resp.raise_for_status()
+	img_bytes = img_resp.content
+
+	# print(data)
+	# b64 = data[0]  # base64 string
+	# img_bytes = base64.b64decode(b64)
+	return img_bytes
+	# return result.json()
 
 def moveGeneratedImageToDestination(source, destination):
 	# Define source and destination paths
@@ -40,7 +67,10 @@ def moveGeneratedImageToDestination(source, destination):
 	os.makedirs(os.path.dirname(destination), exist_ok=True)
 
 	# Move the file
-	shutil.move(source, destination)
+	# shutil.move(source, destination)
+
+	with open(destination, "wb") as f:
+		f.write(source)
 
 
 
@@ -48,8 +78,9 @@ def GenerateImageFooocus(prompt, outputPath, outputFile, fooocusPath, negative_p
 	generateImage = generateImageFromText(prompt, negative_prompt, seed, sampler, performance_selection, aspect_ratios_selection, guidance_scale, model)
 
 	if generateImage:
-		imageUrl = generateImage[0]['url']
-		imagePath = urlparse(imageUrl)
-		path = imagePath.path.lstrip('/')  # Remove leading '/'
-		moveGeneratedImageToDestination(f"{fooocusPath}/outputs/{path}", f"{outputPath}/{outputFile}.png")
+		# imageUrl = generateImage[0]['url']
+		# imagePath = urlparse(imageUrl)
+		# path = imagePath.path.lstrip('/')  # Remove leading '/'
+		# moveGeneratedImageToDestination(f"/app/outputs/{path}", f"{outputPath}/{outputFile}.png")
+		moveGeneratedImageToDestination(generateImage, f"{outputPath}/{outputFile}.png")
 		logger.info(f"Image '{outputFile}.png' generated.")

@@ -1,8 +1,15 @@
 import sys
 import os
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 import globalVariables as gv
+
+
+FOOOCUS_HOST = os.getenv("FOOOCUS_HOST", "story1-fooocus")
+FOOOCUS_PORT = int(os.getenv("FOOOCUS_PORT", "8888"))
+KOKORO_HOST = os.getenv("KOKORO_HOST", "story1-kokoro")
+KOKORO_PORT = int(os.getenv("KOKORO_PORT", "8880"))
+
 
 
 def GenerateImage(prompt, outputPath, outputFile, apiUrl=None, 
@@ -10,7 +17,7 @@ def GenerateImage(prompt, outputPath, outputFile, apiUrl=None,
                    performance_selection=None, aspect_ratios_selection=None, guidance_scale=None, imageModel=None, subModel=None, fooocusPath=None, imageExtension=None):
 
 	# Initialize parameters with defaults or from global variables
-	apiUrl = apiUrl if apiUrl is not None else getattr(gv, 'apiUrl', "http://127.0.0.1:8888/v1/generation/text-to-image")
+	apiUrl = apiUrl if apiUrl is not None else getattr(gv, 'apiUrl', f"http://{FOOOCUS_HOST}:{FOOOCUS_PORT}/v1/generation/text-to-image")
 	negativePrompts = negativePrompts if negativePrompts is not None else getattr(
 		gv, 'negativePrompts',
 		"bad hands, deformed, blurry, jpeg artifacts, ugly, duplicate, morbid, mutilated, extra fingers, mutated hands and fingers, poorly drawn hands and fingers, missing fingers, extra digit, fewer digits, cropped, worst quality, nsfw, lowres, bad anatomy, bad proportions, extra limbs, cloned face, disfigured, gross proportions, malformed limbs, missing arms, missing legs, fused fingers, too many fingers, long neck, cgi, 3d, cartoon, anime, sketch, drawing, painting, illustration, low quality, out of focus, bad lighting, overexposed, underexposed, grainy, pixelated, noisy, artifacts, compression artifacts, watermarks, text, logo, signature, copyright, label, brand, product name"

@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 from lib.imageLib.imageGenerator import GenerateImage
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import globalVariables as gv
 
 def parse_srt_time(t):

@@ -10,7 +10,7 @@ from moviepy.audio.fx import AudioLoop, MultiplyVolume
 from lib.videoLib.effects.zoomEffect import make_zoom_clip
 logger = logging.getLogger(__name__)
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 import globalVariables as gv
 
 def combineImages(image_paths, output_path, audio_duration, imageDurationEachImage=None,
@@ -101,17 +101,17 @@ def combineImages(image_paths, output_path, audio_duration, imageDurationEachIma
                           fps=fps,
                           codec=videoCode,
                           preset=videoPreset,
-                          threads=videoThreds,
-                          logger=None, # You can also set logger=None to see all messages
-                          ffmpeg_params=[
-                              '-loglevel', 'verbose',
-                              '-c:v', 'h264_nvenc',
-                              '-preset', 'p1',          # GPU preset (p1 fastest, p7 best quality)
-                              '-b:v', '5M',             # video bitrate
-                              '-maxrate', '5M',
-                              '-bufsize', '10M',
-                              '-pix_fmt', 'yuv420p'     # pixel format
-                          ]
+                          threads=videoThreds
+                        #   logger=None, # You can also set logger=None to see all messages
+                        #   ffmpeg_params=[
+                        #       '-loglevel', 'verbose',
+                        #       '-c:v', 'libx264',
+                        #       '-preset', 'ultrafast',          # GPU preset (p1 fastest, p7 best quality)
+                        #       '-b:v', '5M',             # video bitrate
+                        #       '-maxrate', '5M',
+                        #       '-bufsize', '10M',
+                        #       '-pix_fmt', 'yuv420p'     # pixel format
+                        #   ]
                           )
 
 

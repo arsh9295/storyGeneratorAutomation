@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 from moviepy import VideoFileClip, AudioFileClip, CompositeAudioClip, concatenate_videoclips
 from moviepy.audio.fx import AudioLoop, MultiplyVolume
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 import globalVariables as gv
 
 def createVideoMviepy(video_path, audio_path, output_path, music_path=None, finalVideoSize=None, imageCombineMethod=None, videoCode=None, videoPreset=None, videoThreds=None, audioCoded=None, musicLoudness=None):
@@ -42,6 +42,7 @@ def createVideoMviepy(video_path, audio_path, output_path, music_path=None, fina
         final_video = video_clip.subclipped(0, audio_duration)
 
     if music_path:
+        logger.info("Found music path, adding music to video")
         music = AudioFileClip(music_path)
         # Prepare looped and volume-adjusted music in one step
         music_looped_quiet = music.with_effects([

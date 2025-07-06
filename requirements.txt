@@ -16,4 +16,6 @@ httplib2
 oauth2client
 gtts
 transformers
-
+flask
+openai
+ctranslate2==4.4.0

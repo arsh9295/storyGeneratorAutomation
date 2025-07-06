@@ -5,10 +5,15 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+FOOOCUS_HOST = os.getenv("FOOOCUS_HOST", "story1-fooocus")
+FOOOCUS_PORT = int(os.getenv("FOOOCUS_PORT", "8888"))
+KOKORO_HOST = os.getenv("KOKORO_HOST", "story1-kokoro")
+KOKORO_PORT = int(os.getenv("KOKORO_PORT", "8880"))
+
 def generateVoice(inputText, storyPath, fileName, voiceName="am_echo"):
     try:
         # client = Client("http://127.0.0.1:7860/")
-        client = Client("http://127.0.0.1:9000/")
+        client = Client(f"http://{KOKORO_HOST}:{KOKORO_PORT}/")
         result = client.predict(
                 text=inputText,
                 model_name="kokoro-v0_19.pth",
@@ -23,6 +28,7 @@ def generateVoice(inputText, storyPath, fileName, voiceName="am_echo"):
                 # autoplay=True,
                 # api_name="/toggle_autoplay"        
         )
+        
         if result:
             fileName = moveFile(result, fr"{storyPath}/{fileName}.wav")
             return fileName

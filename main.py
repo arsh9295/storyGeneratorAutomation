@@ -3,18 +3,16 @@ import json
 import logging
 import importlib.util
 
-global_vars_path = sys.argv[1]
+global_vars_path = sys.argv[1] if len(sys.argv) > 1 else './globalVariables.py'
+module_name = 'globalVariables'  # Important: fixed name to use everywhere
 
-default_path = './globalVariables.py'
-global_vars_path = sys.argv[1] if len(sys.argv) > 1 else default_path
-
-# Step 2: Extract module name (for aliasing like 'gv')
-module_name = os.path.splitext(os.path.basename(global_vars_path))[0]
-
-# Step 3: Dynamically import the module
+# Dynamically import and register in sys.modules
 spec = importlib.util.spec_from_file_location(module_name, global_vars_path)
 gv = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(gv)
+
+# Register it globally so other modules can use: import globalVariables
+sys.modules[module_name] = gv
 
 
 # import globalVariables as gv
@@ -86,16 +84,13 @@ logging.info(f"Story Path is: {finalPath}")
 
 # Combine Audio
 createCombineAudio = combineAudioFiles(f"{finalPath}/Audio/", f"{finalPath}/Audio/combined/combined_audio.mp3")
-
+storyvideoName = storyName.replace(" ","_")
 if gv.addSubtitle:
     logging.info(f"Generating and adding subtitle")
     storyName = storyName.strip()
     subTitleFileName = storyName.replace(" ","_")
     # Generate SRT
     genneeratesrtout = generateASSWithKaraoke(f"{finalPath}/Audio/combined/combined_audio.mp3", f"{subTitleFileName}_subtitles.ass")
-    print(f"Hello: {genneeratesrtout}")
-
-print(f"Hello world ! {genneeratesrtout}")
 
 imageDuration = None
 
@@ -105,13 +100,13 @@ if (gv.addSubtitle) and (gv.createImageFromSRT):
     imageDuration = processSRTFromImage(f"{subTitleFileName}_subtitles.srt", f"{finalPath}", "1")
 
 # Generate Video
-generateVideoWithImages(finalPath, imageDuration)
+generateVideoWithImages(finalPath, imageDuration, storyvideoName)
 
 # Generate Subtitle
 if gv.addSubtitle:
     logging.info(f"Generating and adding subtitle")
     subTitleFileName = storyName.replace(" ","_")
-    videoSubtitle(f"{finalPath}/Audio/combined/combined_audio.mp3", f"{subTitleFileName}_subtitles.ass", f"{finalPath}/Videos/final_video.mp4", f"{finalPath}/Videos/final_video_with_subtitles.mp4")
+    videoSubtitle(f"{finalPath}/Audio/combined/combined_audio.mp3", f"{subTitleFileName}_subtitles.ass", f"{finalPath}/Videos/{subTitleFileName}_final_video.mp4", f"{finalPath}/Videos/final_video_with_subtitles.mp4")
 
 # Generate Thumbnil
 if gv.generateThumbnil:
