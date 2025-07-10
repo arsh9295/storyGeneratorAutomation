@@ -55,7 +55,7 @@ def generateStoryName(storyText):
         storyName = gv.storyName
     else:
         alreadyExistingName = readPromptFile(gv.storyNameFile).replace('\n', '').split(',')
-        storyName = chatBotOutput(gv.chatBotKey, gv.chatBotModel, prompt=f"Generate a catchy story name for below story in {gv.storyLanguage} language. Do not give multiple options or do not write unnessery text. only generate story name in mention language only not other language should be there. do not put astrik to make it bold. do not add new line, do not add any spaical character in name like ', :, etc \n {storyText} \n Name should not be any of {alreadyExistingName}")
+        storyName = chatBotOutput(gv.chatBotKey, gv.chatBotModel, prompt=f"Generate a catchy non-generic human-like story name for below story in {gv.storyLanguage} language. Do not give multiple options or do not write unnessery text. only generate story name in mention language only not other language should be there. do not put astrik to make it bold. do not add new line, do not add any spaical character in name like ', :, etc \n {storyText} \n Name should not be any of {alreadyExistingName}")
 
         storyName = re.sub(r'[^A-Za-z0-9 ]', '', storyName)
 

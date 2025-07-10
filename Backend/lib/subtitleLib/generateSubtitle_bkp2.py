@@ -17,10 +17,9 @@ class MockGlobalVariables:
     resolution = (1920, 1080)
     style_name = "WordPop"
     alignment = 5 # Middle center
-    margin = (30, 30, 30) # This is likely (MarginL, MarginR, MarginV_default_from_margin_tuple)
+    margin = (30, 30, 30)
     pop_duration_ms = 100
     zoom_font_size = 32
-    margin_v = 580 # This is the specific vertical margin, overriding the one in 'margin' tuple
 
 gv = MockGlobalVariables()
 
@@ -58,10 +57,10 @@ def generateASSWithKaraoke(
     resolution=None,
     style_name=None,
     alignment=None,
-    margin=None, # This parameter will now only influence MarginL and MarginR if used
+    margin=None,
     pop_duration_ms=None,
     zoom_font_size=None,
-    margin_v=None # This parameter will be the definitive vertical margin
+    margin_v=None
 ):
     """
     Generates ASS subtitles with word-level karaoke effects, chunked into
@@ -80,18 +79,10 @@ def generateASSWithKaraoke(
     resolution = resolution if resolution is not None else getattr(gv, 'resolution', (1920, 1080))
     style_name = style_name if style_name is not None else getattr(gv, 'style_name', "WordPop")
     alignment = alignment if alignment is not None else getattr(gv, 'alignment', 5)
-    
-    # Handle margin_l and margin_r from the 'margin' tuple
-    # The third element of 'margin' tuple is ignored here as margin_v is handled separately.
-    default_margin_tuple = getattr(gv, 'margin', (30, 30, 30))
-    margin_l = default_margin_tuple[0] if margin is None else margin[0]
-    margin_r = default_margin_tuple[1] if margin is None else margin[1]
-
-    # This margin_v is the specific vertical margin to be used
-    margin_v = margin_v if margin_v is not None else getattr(gv, 'margin_v', 580)
-
+    margin = margin if margin is not None else getattr(gv, 'margin', (30, 30, 30))
     pop_duration_ms = pop_duration_ms if pop_duration_ms is not None else getattr(gv, 'pop_duration_ms', 100)
     zoom_font_size = zoom_font_size if zoom_font_size is not None else getattr(gv, 'zoom_font_size', 32)
+    margin_v = margin_v if margin_v is not None else getattr(gv, 'margin_v', 580)
 
     print("Starting subtitle generation...")
     # Load Whisper model
@@ -101,6 +92,7 @@ def generateASSWithKaraoke(
     segments, _ = model.transcribe(audioFilePath, word_timestamps=True)
 
     playres_x, playres_y = resolution
+    margin_l, margin_r, margin_v = margin
 
     with open(outputASSPath, "w", encoding="utf-8") as f:
         # --- ASS Header ---
@@ -113,12 +105,12 @@ def generateASSWithKaraoke(
         # --- ASS Styles ---
         f.write("[V4+ Styles]\n")
         f.write("Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour,"
-                        " BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle,"
-                        " BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n")
+                " BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle,"
+                " BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n")
         f.write(
             f"Style: {style_name},{font_name},{font_size},{primary_color},{highlight_color},"
             f"{outline_color},{back_color},-1,0,0,0,100,100,0,0,1,2,1,{alignment},"
-            f"{margin_l},{margin_r},{margin_v},1\n\n" # Use the corrected margin_v here
+            f"{margin_l},{margin_r},{margin_v},1\n\n"
         )
 
         # --- ASS Events ---
@@ -130,7 +122,7 @@ def generateASSWithKaraoke(
         all_words = []
         for seg in segments:
             all_words.extend(seg.words)
-
+            
         if not all_words:
             print("No words were transcribed. Output file will be empty.")
             return "No words found"
@@ -160,7 +152,6 @@ def generateASSWithKaraoke(
                 word_end_ms = int((word.end - line_start_time) * 1000)
                 
                 clean_word = word.word.strip().replace('{', '').replace('}', '')
-                clean_word = clean_word.upper()
 
                 # Karaoke effect tag for each word
                 # This makes the word pop to a larger size and different color

@@ -109,24 +109,7 @@ def processingImage(audioDuration, outputFinalPath, key, generatedStory, perImag
     logging.info(f"Number of images to generate: {imageNumber} for chapter {key}")
 
     promptInstruction = f'''
-        Generate exactly {imageNumber} highly detailed, cinematic image prompts based on the story below. Prompts must follow the story’s sequence, capturing key scenes, emotions, and visual transitions with realism and atmospheric consistency.
-
-        1. Character descriptions: 
-        - For each character (e.g., "Leena," "Rahul," "Officer Kumar"), in the first prompt they appear, include age, gender, facial shape, skin tone, distinct facial features (eyes, nose, jawline), hairstyle, clothing style, and current expression or posture.  
-        - In subsequent prompts, refer to them naturally (e.g., “Leena stands by the door,” “Rahul glances over his shoulder”) without re-listing their attributes.
-
-        2. Object/location introductions:
-        - Introduce each key object or setting (e.g., “a rusty wooden cabin with peeling blue paint,” “an old brass lantern”) in its first mention.  
-        - Later prompts may reference them by name (e.g., “the cabin,” “the lantern”) without repeating full descriptions.
-
-        3. Visual storytelling details:
-        - Use vivid details for lighting (golden hour, moonlit shadow), textures (cracked walls, mist), and mood (tense, hopeful, eerie).  
-        - Ensure each prompt reads like a film still—clear cinematic framing, atmosphere, and emotional tone.
-
-        4. Output format:
-        - Do not include titles, labels, numbering, or extra commentary—just {imageNumber} pure prompts, each on a new line, in English.
-
-        Story: '{generatedStory}'
+        Generate exact {imageNumber} image prompts, in stable diffusion sdxl format, for the below short story. Image prompts must follow the sequence of the story. You must divide the whole story into {imageNumber} equal parts by first calculating the number of characters in this story and then dividing it by {imageNumber}. After that, you will have {imageNumber} chunks of the whole story. Now, you will generate simple text-to-image prompts for those {imageNumber} chunks. \n Remember these rules while generating the prompts: \n 1. Include a mix of both, comma separated keywords AND natural language to write the prompts. \n 2. The AI image generator I use doesn't have memory/context feature, that is why it cannot refer to, or get information from any previous prompts. Therefore, make sure to mention everything (every description) in each and every prompt, regardless of if you've mentioned it before in some other prompt. You CAN'T use phrases like "his", "her", "same man", "same woman", etc. or any other such referring words. My AI image generator doesn’t carry over details from previous prompts. I can't stress this enough. NEVER write things that connect to the previous or the next prompts. Each and every prompt MUST be unique and NOT related to any other prompt. REMEMBER that, you can have a bit of context and use his, her, their, etc. in one particular prompt, but NOT across different prompts.\n 3. Keep the prompts short and minimal, without any fluff, and use simple sentences, not complex ones. \n 4. Always describe the scene as a still frame frozen in time. Never describe a sequence of events. I need an image from the prompt, not a video. Keep that in mind. \n 5. If there's a scene that demands expressions on the characters' face, make it highly exaggerated. Dial the expressions to 11.\n 6. Make sure to describe the characters' appearance, like their hair color, hair style, clothing type and appearance, age, body type, ethnicity (Caucasian), etc. and more such things, please be descriptive, along with the name as mentioned in the exerpt, and also describe the overall scene (environment, lighting, etc. be descriptive here too) in detail. Do this in each and every prompt, regardless of using it in another prompt. I want the same character's (whoever the character or scene may be) description in all of the prompts again and again. For example if a person's hair is curly, mention it in each and every prompt. \n 7. Mention the images to be anime and digital art style. \n Please follow each and every rule while generating the prompts.If you forget any of the rules, I will deduct points in your name. \n Now, start creating image prompts for the followng short story: \n {generatedStory} \n Please do not write any description or heading or "Image Prompt" or number in output. I want only prompts seprated by new lines.
     '''
     storyLanguage=gv.storyLanguage
     if storyLanguage.lower() == 'hindi':

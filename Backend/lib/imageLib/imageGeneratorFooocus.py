@@ -22,7 +22,8 @@ def generateImageFromText(prompt, negative_prompt="", seed=-1, sampler="DPM++ 2M
 		"aspect_ratios_selection": aspect_ratios_selection,
 		"guidance_scale": guidance_scale,
 		"model": model,  # adjust to a valid one
-		"save_extension": "jpeg"
+		"save_extension": "jpeg",
+		"style_selections": ["SAI Comic Book", "Misc Kawaii", "SAI Anime", "Adorable Kawaii"]
 	}
 
 	# print("🚀 Sending request to Fooocus API...")
