@@ -67,14 +67,14 @@ logging.info(f"Story Title is: {storyTitle}")
 logging.info(f"Story Path is: {finalPath}")
 
 # Combine Audio
-createCombineAudio = combineAudioFiles(f"{finalPath}/Audio/", f"{finalPath}/Audio/combined/combined_audio.mp3")
+createCombineAudio = combineAudioFiles(f"{finalPath}/Audio/", f"{finalPath}/Audio/combined/combined_audio.mp3", boost=True, boost_multiplier=3)
 
 if gv.addSubtitle:
     logging.info(f"Generating and adding subtitle")
     storyName = storyName.strip()
     subTitleFileName = storyName.replace(" ","_")
     # Generate SRT
-    genneeratesrtout = generateASSWithKaraoke(f"{finalPath}/Audio/combined/combined_audio.mp3", f"{subTitleFileName}_subtitles.ass", words_per_line=4)
+    genneeratesrtout = generateASSWithKaraoke(f"{finalPath}/Audio/combined/combined_audio.mp3", f"{subTitleFileName}_subtitles.ass", words_per_line=3, animation_style="slide_up")
     print(f"Hello: {genneeratesrtout}")
 
 print(f"Hello world ! {genneeratesrtout}")

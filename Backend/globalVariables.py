@@ -4,28 +4,28 @@ currentFile = os.path.abspath(__file__)
 parentDir = os.path.dirname(os.path.dirname(currentFile))
 
 # Videos Generator Settings
-perImageDuration = 6
+perImageDuration = 5
 slidDurationInImage = 0
 additionalImagePath = "" # If Provided, it will add this as last frame
 imageCombineMethod = "compose" #possible values chain, compose
-transitionDuration = 1
-finalVideoSize = None # Can provide resolution of final video, If it not provided it will use image size
+transitionDuration = 0.6
+finalVideoSize = (1080, 1920) # Can provide resolution of final video, If it not provided it will use image size
 wordsPerChapter = None
 createImageFromSRT = False
 
 videoCode = "libx264"
 videoPreset = "ultrafast"
-videoThreds = 16
+videoThreds = 18
 
 audioCoded = "aac"
 
 videoEffect = "Zoom" # Possible values None, Zoom
-ZoomDirection = "Random" # Possible values Randone, 'center', 'left', 'right', 'top', 'bottom'
-zoomStrength = 0.12
+ZoomDirection = "Random" # Possible values 'Random', 'center', 'left', 'right', 'top', 'bottom'
+zoomStrength = 0.18
 
-addMusic = False
-musicLoudness = "10%" # How loudness will be music on video
-musicPath = None # can provide path where multiple music file placed, it will pick any one  / you can directly provide music file name with complete path
+addMusic = True
+musicLoudness = "20%" # How loudness will be music on video
+musicPath = f"F:/Music" # can provide path where multiple music file placed, it will pick any one  / you can directly provide music file name with complete path
 
 # Final Vide Settings
 videoType = "testPrompt"  # or "longVideos"
@@ -61,11 +61,11 @@ useWebSearch = False  # Set to True if you want to use web search capabilities
 
 # Audio settings
 audioModel = "kokoro09" #kokoro09 or kokoro10 or gtts
-audioVoice = "am_michael"  # or any other voice name
+audioVoice = "am_liam"  # or any other voice name
 audioSubModel = "kokoro-v0_19.pth"  # or any other model name
 speed = 1
 pad_between_segments = 0.3
-remove_silence = False
+remove_silence = True
 minimum_silence = 0.05
 custom_voicepack = None  # Set to a custom voice pack if needed
 audioUrl = None  # Set to a specific audio URL if needed
@@ -80,32 +80,31 @@ negativePrompts = '''
 '''
 seed = -1
 sampler = "DPM++ 2M Karras"
-performance_selection = "Extreme Speed" #performance_selection, must be one of Speed, Quality, Extreme Speed default to Speed
-aspect_ratios_selection = "768*1344" #"1920*1080" or "1080*1920"
+performance_selection = "Speed" #performance_selection, must be one of Speed, Quality, Extreme Speed default to Speed
+aspect_ratios_selection = "768*1344" #"1920*1080" or "1088*1920" "768*1344" "512*896"
 guidance_scale = 7.5
-subModel = "juggernautXL_version6Rundiffusion.safetensors"  # adjust to a valid one
+subModel = "animagineXLV31_v31.safetensors" #"juggernautXL_version6Rundiffusion.safetensors"  # adjust to a valid one
 imageModel = "fooocus"
 imageExtension = "png"
 fooocusPath = "C:/AI/Fooocus-API/"
-
 
 # Subtitle Variables 
 addSubtitle = True
 model_name = "base"
 device = "cuda" # "cpu" or "cuda"
 compute_type = "float16"
-highlight_color = "&H00FFFF&"     # cyan
-back_color = "&H64000000&"
 resolution = (1080, 1920) #(1080, 1920)
 # resolution = tuple(map(int, aspect_ratios_selection.split('*'))) #(1080, 1920)
 style_name = "WordPop"
-margin = (30, 30, 30)
+margin = (60, 60, 480)
 pop_duration_ms = 100
-zoom_font_size = 96
+zoom_font_size = 140
 subtitle_format="ass"  # or "srt"
-font_name="Ubuntu"
-font_size=96
-primary_color="&H00FF00&"
+font_name="Komika Title - Axis"
+font_size=140
+primary_color= "&H00FFFF&"
+highlight_color = "&HFFFFFF&"  
+back_color = "&H64000000&"
 outline_color="&H000000&"
 border_style=1
 outline=2
@@ -117,7 +116,7 @@ overwrite=True
 dry_run=False
 
 # Thumbnil Variables
-generateThumbnil= True
+generateThumbnil= False
 font_path_bold=f"{parentDir}/Backend/lib/thumbnilLib/fonts/arialbd.ttf"
 font_path_regular=f"{parentDir}/Backend/lib/thumbnilLib/fonts/arial.ttf"
 title_font_size=72

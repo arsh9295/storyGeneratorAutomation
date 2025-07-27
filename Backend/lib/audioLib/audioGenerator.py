@@ -40,8 +40,8 @@ def audioGenerator(inputText, outputpat, outputfileName, voiceName=None,
             # model_name=model_name,
             # speed=speed,
             # pad_between_segments=pad_between_segments,
-            # remove_silence=remove_silence,
-            # minimum_silence=minimum_silence,
+            remove_silence = remove_silence,
+            minimum_silence = minimum_silence,
             # custom_voicepack=custom_voicepack,
             # audioUrl=audioUrl
         )

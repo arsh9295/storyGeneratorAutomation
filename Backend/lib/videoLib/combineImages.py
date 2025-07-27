@@ -59,5 +59,3 @@ def combineImages(image_paths, output_path, audio_duration, imageDurationEachIma
     final.write_videofile(output_path,
                           fps=fps, codec=videoCode,
                           preset=videoPreset, threads=videoThreds)
-
-

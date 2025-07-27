@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 # Fooocus API URL
 API_URL = "http://127.0.0.1:8888/v1/generation/text-to-image"  # NOT /generate
 
-def generateImageFromText(prompt, negative_prompt="", seed=-1, sampler="DPM++ 2M Karras", performance_selection="Speed", aspect_ratios_selection="1080*1920", guidance_scale= 7.5, model="juggernautXL_version6Rundiffusion.safetensors", imageExtension="png"):
+def generateImageFromText(prompt, negative_prompt="", seed=-1, sampler="DPM++ 2M Karras", performance_selection="Speed", aspect_ratios_selection="1080*1920", guidance_scale= 7.5, model="animagineXLV31_v31.safetensors", imageExtension="png"):
 	# Simple working payload
 	payload = {
 		"prompt": prompt,
@@ -23,7 +23,11 @@ def generateImageFromText(prompt, negative_prompt="", seed=-1, sampler="DPM++ 2M
 		"guidance_scale": guidance_scale,
 		"model": model,  # adjust to a valid one
 		"save_extension": "jpeg",
-		"style_selections": ["SAI Comic Book", "Misc Kawaii", "SAI Anime", "Adorable Kawaii"]
+		"style_selections": ["SAI Comic Book", "Misc Kawaii", "SAI Anime", "Adorable Kawaii"],
+		# "style_selections": ["Neoclassicism","SAI Anime", "SAI Comic Book"]
+		# "enabled": "true",
+		# "model_name": "sd_xl_offset_example-lora_1.0.safetensors",
+		# "weight": "0.5"
 	}
 
 	# print("🚀 Sending request to Fooocus API...")

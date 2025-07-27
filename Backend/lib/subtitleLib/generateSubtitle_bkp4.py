@@ -3,6 +3,7 @@ import sys
 from faster_whisper import WhisperModel
 
 # This is a placeholder for your globalVariables module.
+# In a real scenario, you would have this file.
 class MockGlobalVariables:
     model_name = "base"
     device = "cuda"
@@ -24,6 +25,7 @@ try:
     import globalVariables as gv
 except ImportError:
     print("Warning: 'globalVariables.py' not found. Using default values.")
+    pass
 
 
 def format_ass_time(seconds):
@@ -34,12 +36,11 @@ def format_ass_time(seconds):
     cs = int((seconds - int(seconds)) * 100)
     return f"{hrs}:{mins:02}:{secs:02}.{cs:02}"
 
-
 def generateASSWithKaraoke(
     audioFilePath,
     outputASSPath,
     words_per_line=3,
-    animation_style="karaoke", # "karaoke", "fade", "slide_up", "bounce", "punch"
+    animation_style="karaoke", # <-- New parameter for effects! "karaoke", "fade", "slide_up", "bounce", "punch"
     model_name=None,
     device=None,
     compute_type=None,
@@ -54,7 +55,10 @@ def generateASSWithKaraoke(
     alignment=None,
     margin=None
 ):
-    """Generates ASS subtitles with various CapCut-style animations."""
+    """
+    Generates ASS subtitles with various CapCut-style animations.
+    Animation Styles: "karaoke", "fade", "slide_up", "bounce", "punch"
+    """
     # Set defaults from global variables if not provided
     model_name = model_name if model_name is not None else getattr(gv, 'model_name', "base")
     device = device if device is not None else getattr(gv, 'device', "cuda")
@@ -68,20 +72,16 @@ def generateASSWithKaraoke(
     resolution = resolution if resolution is not None else getattr(gv, 'resolution', (1080, 1920))
     style_name = style_name if style_name is not None else getattr(gv, 'style_name', "DynamicCaption")
     alignment = alignment if alignment is not None else getattr(gv, 'alignment', 2)
-    margin = margin if margin is not None else getattr(gv, 'margin', (40, 40, 480))
+    margin = margin if margin is not None else getattr(gv, 'margin', (40, 40, 40))
 
     print(f"Starting subtitle generation with '{animation_style}' style...")
     model = WhisperModel(model_name, device=device, compute_type=compute_type)
-
+    
     print(f"Transcribing '{os.path.basename(audioFilePath)}'...")
     segments, _ = model.transcribe(audioFilePath, word_timestamps=True)
 
     playres_x, playres_y = resolution
     margin_l, margin_r, margin_v = margin
-
-    # ✅ NEW: Calculate line-level position once
-    pos_x = playres_x // 2
-    pos_y = playres_y - margin_v
 
     with open(outputASSPath, "w", encoding="utf-8") as f:
         # --- ASS Header & Styles ---
@@ -101,11 +101,11 @@ def generateASSWithKaraoke(
 
         # --- CORE LOGIC ---
         all_words = [word for seg in segments for word in seg.words]
-
+            
         if not all_words:
             print("No words were transcribed.")
             return "No words found"
-
+        
         current_pos = 0
         while current_pos < len(all_words):
             chunk_words = []
@@ -119,66 +119,140 @@ def generateASSWithKaraoke(
                 word_text = word.word.strip()
                 ends_with_pause = word_text[-1] in [".", ",", "!", "?", ":", ";", "…", "—"]
 
+                # If pause found OR we hit the words_per_line limit, decide if we can end here
                 if ends_with_pause or words_in_chunk >= words_per_line:
+                    # If it doesn't end with a pause, check if the next word does
                     if not ends_with_pause and current_pos + 1 < len(all_words):
                         next_word = all_words[current_pos + 1]
                         next_text = next_word.word.strip()
                         next_ends_with_pause = next_text[-1] in [".", ",", "!", "?", ":", ";", "…", "—"]
 
+                        # Only add the next word if it creates a natural break
                         if next_ends_with_pause:
                             chunk_words.append(next_word)
                             current_pos += 1
-                    break  # End this chunk
+                    break  # Exit the inner loop: chunk is done
 
                 current_pos += 1
 
             if not chunk_words:
-                break
+                break  # No more words, safety net
 
+            # Calculate timings for this chunk
             line_start_time = chunk_words[0].start
             line_end_time = chunk_words[-1].end
             start_text = format_ass_time(line_start_time)
             end_text = format_ass_time(line_end_time)
 
+            # Build the dialogue line with per-word effects
             dialogue_line = ""
             for i, word in enumerate(chunk_words):
-                word_duration_cs = int((word.end - word.start) * 100)
+                word_start_ms = int((word.start - line_start_time) * 1000)
+                word_duration_cs = int((word.end - word.start) * 100)  # For \K
                 clean_word = word.word.strip().replace('{', '').replace('}', '')
 
-                stagger_delay = i * 200
+                stagger_delay = i * 120  # Customize stagger as needed
 
-                # ✅ Per-word effects, NO \pos here!
+                # Animation style selection (unchanged — reuse your original switch here)
+                effect_tag = ""
                 if animation_style == "karaoke":
                     effect_tag = f"{{\\K{word_duration_cs}}}"
                 elif animation_style == "fade":
-                    effect_tag = f"{{\\1c{primary_color}\\alpha&HFF&\\t({stagger_delay},{stagger_delay+100},\\alpha&H00)}}"
+                    effect_tag = f"{{\\1c{primary_color}\\alpha&HFF&\\t({stagger_delay},{stagger_delay+300},\\alpha&H00)}}"
                 elif animation_style == "slide_up":
                     effect_tag = (
-                        f"{{\\1c{primary_color}\\alpha&HFF&"
-                        f"\\t({stagger_delay},{stagger_delay+100},\\alpha&H00)}}"
+                        f"{{\\an5\\1c{primary_color}\\pos(0,20)\\alpha&HFF&"
+                        f"\\t({stagger_delay},{stagger_delay+400},\\pos(0,0))"
+                        f"\\t({stagger_delay},{stagger_delay+300},\\alpha&H00)}}"
                     )
                 elif animation_style == "bounce":
                     effect_tag = (
-                        f"{{\\1c{highlight_color}\\fscx125\\fscy125\\alpha&HFF&"
-                        f"\\t({stagger_delay},{stagger_delay+100},\\fscx100\\fscy100\\1c{primary_color}\\alpha&H00)}}"
+                        f"{{\\an5\\1c{highlight_color}\\fscx125\\fscy125\\alpha&HFF&"
+                        f"\\t({stagger_delay},{stagger_delay+400},\\fscx100\\fscy100\\1c{primary_color}\\alpha&H00)}}"
                     )
                 elif animation_style == "punch":
                     effect_tag = (
-                        f"{{\\1c{primary_color}\\fscx120\\fscy120\\alpha&HFF&"
-                        f"\\t({stagger_delay},{stagger_delay+100},\\fscx100\\fscy100\\alpha&H00)}}"
+                        f"{{\\an5\\1c{primary_color}\\fscx120\\fscy120\\alpha&HFF&"
+                        f"\\t({stagger_delay},{stagger_delay+300},\\fscx100\\fscy100\\alpha&H00)}}"
                     )
                 else:
                     effect_tag = f"{{\\1c{highlight_color}}}"
 
                 dialogue_line += f"{effect_tag}{clean_word} "
 
-            # ✅ Final line: single \pos for the whole line
-            f.write(
-                f"Dialogue: 0,{start_text},{end_text},{style_name},,0,0,0,,"
-                f"{{\\r\\an5\\pos({pos_x},{pos_y})}}{dialogue_line.strip()}\n"
-            )
+            f.write(f"Dialogue: 0,{start_text},{end_text},{style_name},,0,0,0,,{{\\r}}{dialogue_line.strip()}\n")
 
-            current_pos += 1
+            current_pos += 1  # Move to the next word after the chunk
 
-    print(f"ASS file creation completed: '{outputASSPath}'")
-    return "Success"
+
+        
+        
+
+        
+        
+    #     current_pos = 0
+    #     while current_pos < len(all_words):
+    #         chunk_end_pos = min(current_pos + words_per_line, len(all_words))
+    #         chunk_words = all_words[current_pos:chunk_end_pos]
+
+    #         if not chunk_words: break
+
+    #         line_start_time = chunk_words[0].start
+    #         line_end_time = chunk_words[-1].end
+    #         start_text = format_ass_time(line_start_time)
+    #         end_text = format_ass_time(line_end_time)
+
+    #         dialogue_line = ""
+    #         for i, word in enumerate(chunk_words):
+    #             word_start_ms = int((word.start - line_start_time) * 1000)
+    #             word_duration_cs = int((word.end - word.start) * 100) # Duration in centiseconds for \K
+                
+    #             clean_word = word.word.strip().replace('{', '').replace('}', '')
+                
+    #             # --- ANIMATION STYLE SELECTION (Corrected and Improved) ---
+    #             effect_tag = ""
+    #             stagger_delay = i * 80 # Stagger animation for each word in a line
+
+    #             if animation_style == "karaoke":
+    #                 # Fills word with SecondaryColour. \K uses centiseconds.
+    #                 effect_tag = f"{{\\K{word_duration_cs}}}"
+                
+    #             elif animation_style == "fade":
+    #                 # Fades each word in.
+    #                 effect_tag = f"{{\\1c{primary_color}\\alpha&HFF&\\t({stagger_delay}, {stagger_delay+300}, \\alpha&H00)}}"
+
+    #             elif animation_style == "slide_up":
+    #                 # BUG FIX: Replaced invalid \fad with \t(\alpha) transform.
+    #                 # Slides each word up and fades it in.
+    #                 effect_tag = (
+    #                     f"{{\\an5\\1c{primary_color}\\pos(0,20)\\alpha&HFF&" # Initial state: moved down, transparent
+    #                     f"\\t({stagger_delay}, {stagger_delay+400}, \\pos(0,0))" # Animate position
+    #                     f"\\t({stagger_delay}, {stagger_delay+300}, \\alpha&H00)}}" # Animate alpha
+    #                 )
+                
+    #             elif animation_style == "bounce":
+    #                 # Bounces in size and changes color temporarily. More robust now.
+    #                 effect_tag = (
+    #                     f"{{\\an5\\1c{highlight_color}\\fscx125\\fscy125\\alpha&HFF&" # Initial state
+    #                     f"\\t({stagger_delay}, {stagger_delay+400}, \\fscx100\\fscy100\\1c{primary_color}\\alpha&H00)}}"
+    #                 )
+                
+    #             elif animation_style == "punch":
+    #                 # NEW STYLE: Starts bigger and transparent, then scales down and fades in.
+    #                 effect_tag = (
+    #                     f"{{\\an5\\1c{primary_color}\\fscx120\\fscy120\\alpha&HFF&" # Initial state
+    #                     f"\\t({stagger_delay}, {stagger_delay+300}, \\fscx100\\fscy100\\alpha&H00)}}"
+    #                 )
+
+    #             else: # Default to a simple highlight if style is unknown
+    #                  effect_tag = f"{{\\1c{highlight_color}}}"
+
+    #             dialogue_line += f"{effect_tag}{clean_word} "
+
+    #         # The {\r} tag resets the style for the line.
+    #         f.write(f"Dialogue: 0,{start_text},{end_text},{style_name},,0,0,0,,{{\\r}}{dialogue_line.strip()}\n")
+
+    #         current_pos = chunk_end_pos
+
+    # print(f"ASS file creation completed: '{outputASSPath}'")
+    # return "Success"

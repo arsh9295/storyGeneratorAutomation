@@ -5,7 +5,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def generateVoice(inputText, storyPath, fileName, voiceName="am_echo"):
+def generateVoice(inputText, storyPath, fileName, voiceName="am_echo", remove_silence=True, minimum_silence=0.05):
     try:
         # client = Client("http://127.0.0.1:7860/")
         client = Client("http://127.0.0.1:9000/")
@@ -15,7 +15,7 @@ def generateVoice(inputText, storyPath, fileName, voiceName="am_echo"):
                 voice_name=voiceName,
                 speed=0.85,
                 pad_between_segments=0.3,
-                remove_silence=False,
+                remove_silence=True,
                 minimum_silence=0.05,
                 custom_voicepack=None,
                 api_name="/text_to_speech"
