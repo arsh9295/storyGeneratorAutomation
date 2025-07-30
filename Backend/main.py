@@ -68,6 +68,7 @@ logging.info(f"Story Path is: {finalPath}")
 
 # Combine Audio
 createCombineAudio = combineAudioFiles(f"{finalPath}/Audio/", f"{finalPath}/Audio/combined/combined_audio.mp3", boost=True, boost_multiplier=3)
+storyvideoName = storyName.replace(" ","_")
 
 if gv.addSubtitle:
     logging.info(f"Generating and adding subtitle")
@@ -87,13 +88,13 @@ if (gv.addSubtitle) and (gv.createImageFromSRT):
     imageDuration = processSRTFromImage(f"{subTitleFileName}_subtitles.srt", f"{finalPath}", "1")
 
 # Generate Video
-generateVideoWithImages(finalPath, imageDuration)
+generateVideoWithImages(finalPath, imageDuration, storyvideoName)
 
 # Generate Subtitle
 if gv.addSubtitle:
     logging.info(f"Generating and adding subtitle")
     subTitleFileName = storyName.replace(" ","_")
-    videoSubtitle(f"{finalPath}/Audio/combined/combined_audio.mp3", f"{subTitleFileName}_subtitles.ass", f"{finalPath}/Videos/final_video.mp4", f"{finalPath}/Videos/final_video_with_subtitles.mp4")
+    videoSubtitle(f"{finalPath}/Audio/combined/combined_audio.mp3", f"{subTitleFileName}_subtitles.ass", f"{finalPath}/Videos/{subTitleFileName}_final_video.mp4", f"{finalPath}/Videos/final_video_with_subtitles.mp4")
 
 # Generate Thumbnil
 if gv.generateThumbnil:

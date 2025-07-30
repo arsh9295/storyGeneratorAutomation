@@ -4,6 +4,8 @@ from moviepy import ImageClip, VideoClip, concatenate_videoclips
 from moviepy.video.fx import FadeIn, FadeOut
 
 from lib.videoLib.effects.zoomEffect import make_zoom_clip
+from moviepy import VideoFileClip, AudioFileClip, CompositeAudioClip, concatenate_videoclips
+from moviepy.audio.fx import AudioLoop, MultiplyVolume
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 import globalVariables as gv
@@ -11,7 +13,7 @@ import globalVariables as gv
 def combineImages(image_paths, output_path, audio_duration, imageDurationEachImage=None,
                         imageDuration=None,
                         slidDurationInImage=None, additionalImagePath=None,
-                        transitionDuration=None, fps=None, videoCode=None, videoPreset=None, finalVideoSize=None, imageCombineMethod=None, videoThreds=None, zoomStrength=None):
+                        transitionDuration=None, fps=None, videoCode=None, videoPreset=None, finalVideoSize=None, imageCombineMethod=None, videoThreds=None, zoomStrength=None, music_path=None, audio_path=None, musicLoudness=None):
 
     imageDuration = imageDuration if imageDuration is not None else getattr(gv, 'perImageDuration', 7)
     slidDurationInImage = slidDurationInImage if slidDurationInImage is not None else getattr(gv, 'slidDurationInImage', 0)
@@ -24,9 +26,11 @@ def combineImages(image_paths, output_path, audio_duration, imageDurationEachIma
     zoomStrength = zoomStrength if zoomStrength is not None else getattr(gv, 'zoomStrength', 0.1)
     fps = fps if fps is not None else getattr(gv, 'fps', 24)
     finalVideoSize = finalVideoSize if finalVideoSize is not None else getattr(gv, 'finalVideoSize', None)
+    musicLoudness = musicLoudness if musicLoudness is not None else getattr(gv, 'musicLoudness', "10%")
 
     ImagesOnVideoDefined = True if slidDurationInImage > 0 else False
 
+    audio_clip = AudioFileClip(audio_path)
 
     os.makedirs(os.path.dirname(output_path) or '.', exist_ok=True)
     n = len(image_paths)
@@ -56,6 +60,40 @@ def combineImages(image_paths, output_path, audio_duration, imageDurationEachIma
         clips.append(additional_clip)    
 
     final = concatenate_videoclips(clips, method=imageCombineMethod, padding=-transitionDuration)
+
+    # Freeze last frame if audio is longer than video
+    video_duration = final.duration
+    if audio_duration > video_duration:
+        logging.info("Audio is longer than video. Freezing the last frame of the video.")
+        freeze = final.to_ImageClip(t=video_duration - 1, duration=audio_duration - video_duration)
+        freeze = freeze.with_fps(fps).resized(final.size)
+        final = concatenate_videoclips([final, freeze], method=imageCombineMethod)
+
+    # Add audio/music
+    if music_path:
+        music = AudioFileClip(music_path)
+        music_looped_quiet = music.with_effects([
+            AudioLoop(duration=final.duration),
+            MultiplyVolume(float(musicLoudness.strip('%')) / 100)
+        ])
+        combined_audio = CompositeAudioClip([audio_clip, music_looped_quiet])
+        final = final.with_audio(combined_audio)
+    else:
+        final = final.with_audio(audio_clip)
+
+    if finalVideoSize:
+        final = final.resized(new_size=finalVideoSize)
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+
+    print(f"Parameters are: {fps} --> {videoCode} --> {videoPreset} --> {videoThreds}")
     final.write_videofile(output_path,
-                          fps=fps, codec=videoCode,
-                          preset=videoPreset, threads=videoThreds)
+                          fps=fps,
+                          codec=videoCode,
+                          preset=videoPreset,
+                          threads=videoThreds)
+
+    # final.write_videofile(output_path,
+    #                       fps=fps, codec=videoCode,
+    #                       preset=videoPreset, threads=videoThreds)
